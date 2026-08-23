@@ -18,7 +18,6 @@ return new class extends Migration
             $table->string('movement_type', 30);
             $table->integer('quantity');
             $table->string('reference_type', 30)->nullable();
-            $table->unsignedBigInteger('reference_id')->nullable();
             $table->text('note')->nullable();
             $table->timestampTz('created_at')
                 ->useCurrent();

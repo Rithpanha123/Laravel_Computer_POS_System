@@ -13,10 +13,8 @@ return new class extends Migration
     {
         Schema::create('role_permissions', function (Blueprint $table) {
             $table->id('rp_id');
-
             $table->unsignedBigInteger('role_id');
             $table->unsignedBigInteger('permission_id');
-
             $table->timestampsTz();
 
             $table->foreign('role_id')
@@ -30,7 +28,7 @@ return new class extends Migration
                 ->on('permissions')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
-
+                               
             $table->unique(
                 ['role_id', 'permission_id'],
                 'role_permissions_role_permission_unique'
