@@ -11,7 +11,11 @@ class Product extends Model
 {
     protected $table = 'products';
 
-    protected $primarykey = 'product_id';
+    // កែជាអក្សរ K ធំ
+    protected $primaryKey = 'product_id';
+
+    public $incrementing = true;
+    protected $keyType = 'int';
 
     protected $fillable = [
         'sku',
@@ -30,24 +34,26 @@ class Product extends Model
     ];
 
     protected $casts = [
-        'cost_price' => 'decimal:2',
-        'selling_price' => 'decimal:2',
-        'stock_quantity' => 'interger',
-        'reoder_level' => 'interger',
-        'is_serialized' => 'boolean',
-        'is_active' => 'boolean'
+        'cost_price'     => 'decimal:2',
+        'selling_price'  => 'decimal:2',
+        'stock_quantity' => 'integer',   // កែពី 'interger' ទៅជា 'integer'
+        'reorder_level'  => 'integer',   // កែពី 'reoder_level' => 'interger'
+        'is_serialized'  => 'boolean',
+        'is_active'      => 'boolean',
+        'created_at'     => 'datetime',
+        'updated_at'     => 'datetime',
     ];
 
-    public function category(): BelongTo
+    public function category(): BelongsTo
     {
         return $this->belongsTo(
             Category::class,
-            'categoty_id',
-            'cate_id'
+            'category_id', // Foreign Key លើតារាង products
+            'cate_id'      // Primary Key លើតារាង categories
         );
     }
 
-    public function brand(): BelongTo
+    public function brand(): BelongsTo
     {
         return $this->belongsTo(
             Brand::class,

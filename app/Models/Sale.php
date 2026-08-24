@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Sale extends Model
 {
@@ -30,14 +32,14 @@ class Sale extends Model
     ];
 
     protected $casts = [
-        'sale_date' => 'datetime',
-        'created_at' => 'datetime',
-        'subtotal' => 'decimal:2',
-        'discount' => 'decimal:2',
-        'tax' => 'decimal:2',
+        'sale_date'    => 'datetime',
+        'created_at'   => 'datetime',
+        'subtotal'     => 'decimal:2',
+        'discount'     => 'decimal:2',
+        'tax'          => 'decimal:2',
         'total_amount' => 'decimal:2',
-        'paid_amount' => 'decimal:2',
-        'due_amount' => 'decimal:2',
+        'paid_amount'  => 'decimal:2',
+        'due_amount'   => 'decimal:2',
     ];
 
     public function customer(): BelongsTo

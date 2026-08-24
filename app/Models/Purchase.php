@@ -3,13 +3,13 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Purchase extends Model
 {
     protected $table = 'purchases';
-
     protected $primaryKey = 'purchase_id';
-
     public $timestamps = false;
 
     protected $fillable = [
@@ -31,48 +31,27 @@ class Purchase extends Model
 
     protected $casts = [
         'purchase_date' => 'datetime',
-        'created_at' => 'datetime',
-        'subtotal' => 'decimal:2',
-        'discount' => 'decimal:2',
-        'tax' => 'decimal:2',
-        'total_amount' => 'decimal:2',
-        'paid_amount' => 'decimal:2',
-        'due_amount' => 'decimal:2',
+        'created_at'    => 'datetime',
+        'subtotal'      => 'decimal:2',
+        'discount'      => 'decimal:2',
+        'tax'           => 'decimal:2',
+        'total_amount'  => 'decimal:2',
+        'paid_amount'   => 'decimal:2',
+        'due_amount'    => 'decimal:2',
     ];
 
     public function supplier(): BelongsTo
     {
-        return $this->belongsTo(
-            Supplier::class,
-            'supplier_id',
-            'supplier_id'
-        );
+        return $this->belongsTo(Supplier::class, 'supplier_id', 'supplier_id');
     }
 
     public function user(): BelongsTo
     {
-        return $this->belongsTo(
-            User::class,
-            'user_id',
-            'user_id'
-        );
+        return $this->belongsTo(User::class, 'user_id', 'user_id');
     }
 
     public function items(): HasMany
     {
-        return $this->hasMany(
-            PurchaseItem::class,
-            'purchase_id',
-            'purchase_id'
-        );
-    }
-
-    public function payments(): HasMany
-    {
-        return $this->hasMany(
-            Payment::class,
-            'purchase_id',
-            'purchase_id'
-        );
+        return $this->hasMany(PurchaseItem::class, 'purchase_id', 'purchase_id');
     }
 }
