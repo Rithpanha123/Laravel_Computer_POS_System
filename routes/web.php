@@ -6,6 +6,10 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\SaleController;
 use App\Http\Controllers\PurchaseController;
+use App\Http\Controllers\RepairController;
+use App\Http\Controllers\StaffController;
+use App\Http\Controllers\ExpenseController;
+
 
 // Redirect root to login
 Route::get('/', function () {
@@ -56,5 +60,27 @@ Route::middleware('auth')->group(function () {
 Route::middleware('auth')->group(function () {
     Route::resource('purchases', PurchaseController::class);
 });
+Route::middleware('auth')->group(function () {
+    Route::get('/purchases/{purchase}/pdf', [PurchaseController::class, 'exportPdf'])->name('purchases.pdf');
+    Route::get('/purchases/{purchase}/excel', [PurchaseController::class, 'exportExcel'])->name('purchases.excel');
+    Route::get('/purchases-export-all-excel', [PurchaseController::class, 'exportExcel'])->name('purchases.export.all');
+});
+
+
+// Repair Routes
+Route::middleware('auth')->group(function () {
+    Route::resource('repairs', RepairController::class);
+});
+
+// Staff Routes
+Route::middleware('auth')->group(function () {
+    Route::resource('staff', StaffController::class);
+});
+
+// Expense Routes
+Route::middleware('auth')->group(function () {
+    Route::resource('expenses', ExpenseController::class)->except(['create', 'show', 'edit']);
+});
+
 
 });

@@ -101,6 +101,9 @@
                             @endif
                         </td>
                         <td class="py-3.5 px-6 text-right">
+                            <a href="{{ route('purchases.edit', $purchase->purchase_id) }}" class="px-4 py-2 bg-amber-50 text-amber-600 hover:bg-amber-100 rounded-xl text-xs font-bold transition inline-flex items-center">
+                            <i class="fa-solid fa-pen-to-square mr-1.5"></i> Edit PO
+                            </a>
                             <a href="{{ route('purchases.show', $purchase->purchase_id) }}" class="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition inline-flex items-center" title="View Purchase Details">
                                 <i class="fa-regular fa-eye text-base"></i>
                             </a>

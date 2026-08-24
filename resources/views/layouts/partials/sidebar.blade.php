@@ -85,14 +85,14 @@
                 </a>
 
                 <!-- Repairs -->
-                <a href="#" 
+                <a href="{{ route('repairs.index') }}" 
                    class="flex items-center px-3 py-2.5 rounded-xl text-sm font-medium text-slate-300 hover:bg-slate-800 hover:text-white transition-colors group">
                     <i class="fa-solid fa-screwdriver-wrench w-6 text-center text-base text-rose-400 group-hover:text-white"></i>
                     <span class="ml-3 truncate" :class="!sidebarOpen && 'lg:hidden'">Repairs</span>
                 </a>
 
                 <!-- Expenses -->
-                <a href="#" 
+                <a href="{{ route('expenses.index') }}" 
                    class="flex items-center px-3 py-2.5 rounded-xl text-sm font-medium text-slate-300 hover:bg-slate-800 hover:text-white transition-colors group">
                     <i class="fa-solid fa-wallet w-6 text-center text-base text-violet-400 group-hover:text-white"></i>
                     <span class="ml-3 truncate" :class="!sidebarOpen && 'lg:hidden'">Expenses</span>
@@ -105,12 +105,19 @@
             <p class="px-3 text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-2" :class="!sidebarOpen && 'lg:hidden'">
                 Administration
             </p>
-            <div class="space-y-1">
+            <div class="spac e-y-1">
                 <!-- User Management -->
                 <a href="{{ route('users.index') }}" 
                    class="flex items-center px-3 py-2.5 rounded-xl text-sm font-medium transition-colors group {{ request()->routeIs('users.*') ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
                     <i class="fa-solid fa-users-gear w-6 text-center text-base {{ request()->routeIs('users.*') ? 'text-white' : 'text-teal-400 group-hover:text-white' }}"></i>
                     <span class="ml-3 truncate" :class="!sidebarOpen && 'lg:hidden'">Users & Roles</span>
+                </a>
+
+                <!-- User staff -->
+                <a href="{{ route('staff.index') }}" 
+                   class="flex items-center px-3 py-2.5 rounded-xl text-sm font-medium transition-colors group {{ request()->routeIs('staff.*') ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
+                    <i class="fa-solid fa-users-gear w-6 text-center text-base {{ request()->routeIs('staff.*') ? 'text-white' : 'text-teal-400 group-hover:text-white' }}"></i>
+                    <span class="ml-3 truncate" :class="!sidebarOpen && 'lg:hidden'">Staff</span>
                 </a>
 
                 <!-- Reports -->

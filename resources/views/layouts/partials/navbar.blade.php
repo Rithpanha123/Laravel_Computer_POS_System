@@ -29,7 +29,7 @@
     <!-- Right: Actions & User Menu -->
     <div class="flex items-center space-x-3">
         <!-- POS Quick Button -->
-        <a href="#" class="hidden sm:inline-flex items-center space-x-1.5 px-3 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 text-xs font-semibold rounded-xl transition">
+        <a href="{{ route('pos.index') }}" class="hidden sm:inline-flex items-center space-x-1.5 px-3 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 text-xs font-semibold rounded-xl transition">
             <i class="fa-solid fa-plus text-xs"></i>
             <span>New Sale</span>
         </a>

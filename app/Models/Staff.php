@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Staff extends Model
 {
@@ -37,9 +38,9 @@ class Staff extends Model
 
     protected $casts = [
         'date_of_birth' => 'date',
-        'hire_date' => 'date',
-        'resign_date' => 'date',
-        'salary' => 'decimal:2',
+        'hire_date'     => 'date',
+        'resign_date'   => 'date',
+        'salary'        => 'decimal:2',
     ];
 
     public function gender(): BelongsTo

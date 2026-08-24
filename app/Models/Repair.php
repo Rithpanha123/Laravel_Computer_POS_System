@@ -3,19 +3,19 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Repair extends Model
 {
     protected $table = 'repairs';
-
     protected $primaryKey = 'repair_id';
-
     public $timestamps = false;
 
     protected $fillable = [
         'repair_no',
         'customer_id',
-        'technician_id',
+        'technician_id', // ត្រូវប្រាកដថាមានត្រង់នេះ
         'device_name',
         'serial_number',
         'problem_description',
@@ -30,44 +30,18 @@ class Repair extends Model
 
     protected $casts = [
         'estimated_cost' => 'decimal:2',
-        'final_cost' => 'decimal:2',
-        'received_at' => 'datetime',
-        'completed_at' => 'datetime',
+        'final_cost'     => 'decimal:2',
+        'received_at'    => 'datetime',
+        'completed_at'   => 'datetime',
     ];
 
     public function customer(): BelongsTo
     {
-        return $this->belongsTo(
-            Customer::class,
-            'customer_id',
-            'customer_id'
-        );
+        return $this->belongsTo(Customer::class, 'customer_id', 'customer_id');
     }
 
     public function technician(): BelongsTo
     {
-        return $this->belongsTo(
-            Staff::class,
-            'technician_id',
-            'staff_id'
-        );
-    }
-
-    public function items(): HasMany
-    {
-        return $this->hasMany(
-            RepairItem::class,
-            'repair_id',
-            'repair_id'
-        );
-    }
-
-    public function payments(): HasMany
-    {
-        return $this->hasMany(
-            RepairPayment::class,
-            'repair_id',
-            'repair_id'
-        );
+        return $this->belongsTo(Staff::class, 'technician_id', 'staff_id');
     }
 }

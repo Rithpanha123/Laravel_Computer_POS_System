@@ -1,0 +1,202 @@
+@extends('layouts.app')
+
+@section('title', 'វិក្កយបត្រ #' . $sale->invoice_no . ' - POS System')
+@section('page_heading', 'Invoice Details')
+
+@section('content')
+<div class="max-w-4xl mx-auto space-y-6">
+
+    <!-- Top Action Bar (No Print) -->
+    <div class="flex items-center justify-between no-print">
+        <a href="{{ route('sales.index') }}" class="px-4 py-2 bg-white border border-gray-200 rounded-xl text-xs font-semibold text-gray-600 hover:bg-gray-50 transition shadow-sm inline-flex items-center">
+            <i class="fa-solid fa-arrow-left mr-2"></i> ត្រឡប់ទៅបញ្ជីវិក្កយបត្រ
+        </a>
+        <div class="flex items-center gap-2">
+            <a href="{{ route('pos.index') }}" class="px-4 py-2 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-xl text-xs font-bold transition inline-flex items-center">
+                <i class="fa-solid fa-cash-register mr-1.5"></i> លក់ថ្មី (POS)
+            </a>
+            <button onclick="window.print()" class="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold shadow-sm transition inline-flex items-center">
+                <i class="fa-solid fa-print mr-1.5"></i> បោះពុម្ពវិក្កយបត្រ (Print)
+            </button>
+        </div>
+    </div>
+
+    <!-- Printable Invoice Card -->
+    <div class="bg-white rounded-3xl border border-gray-100 shadow-sm p-6 sm:p-10 space-y-8 print-container">
+        
+        <!-- Header & Company Info -->
+        <div class="flex flex-col sm:flex-row justify-between items-start pb-6 border-b border-gray-100 gap-4">
+            <div>
+                <h1 class="text-2xl font-black text-gray-800 tracking-tight flex items-center gap-2">
+                    <i class="fa-solid fa-laptop-code text-blue-600"></i> COMPUTER STORE & POS
+                </h1>
+                <p class="text-xs text-gray-500 mt-1">លក់ដុំ-រាយ កុំព្យូទ័រ គ្រឿងបន្លាស់ និងសេវាកម្មជួសជុល</p>
+                <p class="text-xs text-gray-400 mt-0.5">អាសយដ្ឋាន៖ រាជធានីភ្នំពេញ | ទូរស័ព្ទ៖ 012 345 678</p>
+            </div>
+            <div class="text-left sm:text-right">
+                <span class="inline-block font-mono font-black text-sm text-blue-600 bg-blue-50 px-3 py-1 rounded-xl border border-blue-100">
+                    #{{ $sale->invoice_no }}
+                </span>
+                <p class="text-xs text-gray-500 mt-2">ថ្ងៃចេញវិក្កយបត្រ៖ <span class="font-medium text-gray-800">{{ optional($sale->sale_date)->format('d M Y, h:i A') }}</span></p>
+                <p class="text-xs text-gray-500 mt-0.5">អ្នកគិតលុយ (Cashier)៖ <span class="font-medium text-gray-800">{{ $sale->user->full_name ?? $sale->user->username ?? 'Cashier' }}</span></p>
+            </div>
+        </div>
+
+        <!-- Customer & Payment Overview -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 bg-gray-50/70 p-5 rounded-2xl border border-gray-100">
+            <div>
+                <p class="text-[11px] font-bold uppercase tracking-wider text-gray-400 mb-1">ព័ត៌មានអតិថិជន (Customer)</p>
+                <p class="text-sm font-bold text-gray-800">{{ $sale->customer->name ?? $sale->customer->customer_name ?? 'Walk-in Customer (ភ្ញៀវទូទៅ)' }}</p>
+                <p class="text-xs text-gray-600 mt-0.5"><i class="fa-solid fa-phone mr-1.5 text-gray-400"></i>{{ $sale->customer->phone ?? 'គ្មានលេខទូរស័ព្ទ' }}</p>
+                @if($sale->customer->address ?? false)
+                    <p class="text-xs text-gray-500 mt-0.5"><i class="fa-solid fa-location-dot mr-1.5 text-gray-400"></i>{{ $sale->customer->address }}</p>
+                @endif
+            </div>
+
+            <div class="sm:text-right">
+                <p class="text-[11px] font-bold uppercase tracking-wider text-gray-400 mb-1">ស្ថានភាពទូទាត់ (Payment Status)</p>
+                <div class="mt-1">
+                    @if(strtolower($sale->payment_status) === 'paid')
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span> បានទូទាត់គ្រប់ចំនួន (Paid)
+                        </span>
+                    @elseif(strtolower($sale->payment_status) === 'partial')
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800">
+                            <span class="w-1.5 h-1.5 rounded-full bg-amber-600"></span> នៅខ្វះខ្លះ (Partial)
+                        </span>
+                    @else
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-rose-100 text-rose-800">
+                            <span class="w-1.5 h-1.5 rounded-full bg-rose-600"></span> មិនទាន់ទូទាត់ (Unpaid)
+                        </span>
+                    @endif
+                </div>
+                <p class="text-xs text-gray-500 mt-2">វិធីសាស្ត្រទូទាត់៖ <span class="font-bold text-gray-700 uppercase">{{ $sale->payment_method ?? 'Cash' }}</span></p>
+            </div>
+        </div>
+
+        <!-- Purchased Items Table -->
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-xs sm:text-sm">
+                <thead>
+                    <tr class="bg-gray-50/75 border-b border-gray-100 text-[11px] font-bold uppercase tracking-wider text-gray-400">
+                        <th class="py-3 px-4">#</th>
+                        <th class="py-3 px-4">មុខទំនិញ / ការពិពណ៌នា</th>
+                        <th class="py-3 px-4 text-center">ចំនួន (Qty)</th>
+                        <th class="py-3 px-4 text-right">តម្លៃរាយ ($)</th>
+                        <th class="py-3 px-4 text-right">បញ្ចុះតម្លៃ ($)</th>
+                        <th class="py-3 px-4 text-right">សរុប ($)</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100 text-gray-700">
+                    @forelse($sale->items as $index => $item)
+                    <tr>
+                        <td class="py-3.5 px-4 text-gray-400 font-mono">{{ $index + 1 }}</td>
+                        <td class="py-3.5 px-4">
+                            <p class="font-bold text-gray-800">{{ $item->product->product_name ?? 'Item #' . $item->product_id }}</p>
+                            @if(optional($item->product)->product_code)
+                                <span class="font-mono text-[10px] text-gray-400">Code: {{ $item->product->product_code }}</span>
+                            @endif
+                        </td>
+                        <td class="py-3.5 px-4 text-center font-bold text-gray-800">{{ $item->quantity }}</td>
+                        <td class="py-3.5 px-4 text-right font-medium text-gray-600">${{ number_format($item->unit_price, 2) }}</td>
+                        <td class="py-3.5 px-4 text-right text-gray-400">${{ number_format($item->discount_amount ?? 0, 2) }}</td>
+                        <td class="py-3.5 px-4 text-right font-bold text-gray-800">${{ number_format($item->subtotal, 2) }}</td>
+                    </tr>
+                    @empty
+                    <tr>
+                        <td colspan="6" class="py-6 text-center text-gray-400">គ្មានទិន្នន័យទំនិញក្នុងវិក្កយបត្រនេះឡើយ</td>
+                    </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Summary & Balance Calculation -->
+        <div class="flex justify-end pt-4 border-t border-gray-100">
+            <div class="w-full sm:w-80 space-y-2.5 text-xs">
+                <div class="flex justify-between text-gray-600">
+                    <span>សរុបបឋម (Subtotal):</span>
+                    <span class="font-semibold">${{ number_format($sale->subtotal ?? $sale->total_amount, 2) }}</span>
+                </div>
+                @if(($sale->discount_amount ?? 0) > 0)
+                <div class="flex justify-between text-rose-500">
+                    <span>បញ្ចុះតម្លៃសរុប (Total Discount):</span>
+                    <span class="font-semibold">-${{ number_format($sale->discount_amount, 2) }}</span>
+                </div>
+                @endif
+                @if(($sale->tax_amount ?? 0) > 0)
+                <div class="flex justify-between text-gray-600">
+                    <span>ពន្ធ (Tax):</span>
+                    <span class="font-semibold">+${{ number_format($sale->tax_amount, 2) }}</span>
+                </div>
+                @endif
+                <div class="flex justify-between text-sm font-black text-gray-800 pt-2 border-t border-gray-100">
+                    <span>ទឹកប្រាក់សរុប (Grand Total):</span>
+                    <span class="text-blue-600 text-base font-black">${{ number_format($sale->total_amount, 2) }}</span>
+                </div>
+                <div class="flex justify-between text-gray-700 pt-1">
+                    <span>បានបង់ប្រាក់ (Paid Amount):</span>
+                    <span class="font-bold text-emerald-600">${{ number_format($sale->paid_amount, 2) }}</span>
+                </div>
+                @if($sale->due_amount > 0)
+                <div class="flex justify-between text-rose-600 font-bold pt-1 bg-rose-50 p-2 rounded-xl">
+                    <span>នៅខ្វះ (Due Balance):</span>
+                    <span>${{ number_format($sale->due_amount, 2) }}</span>
+                </div>
+                @endif
+            </div>
+        </div>
+
+        <!-- Notes -->
+        @if($sale->notes)
+        <div class="p-4 bg-gray-50 rounded-2xl border border-gray-100 text-xs text-gray-600">
+            <span class="font-bold text-gray-700 block mb-1">កំណត់សម្គាល់ (Notes):</span>
+            {{ $sale->notes }}
+        </div>
+        @endif
+
+        <!-- Footer Signatures -->
+        <div class="grid grid-cols-2 gap-8 pt-10 text-center text-xs text-gray-500">
+            <div>
+                <p class="mb-14 font-medium">ហត្ថលេខាអតិថិជន (Customer)</p>
+                <div class="border-b border-gray-300 w-36 mx-auto"></div>
+            </div>
+            <div>
+                <p class="mb-14 font-medium">ហត្ថលេខាអ្នកលក់ (Authorized Seller)</p>
+                <div class="border-b border-gray-300 w-36 mx-auto"></div>
+            </div>
+        </div>
+
+        <!-- Thank you note -->
+        <div class="text-center pt-6 text-xs text-gray-400 border-t border-gray-100">
+            <p>សូមអរគុណចំពោះការគាំទ្ររបស់លោកអ្នក! សូមពិនិត្យទំនិញមុនចាកចេញ។</p>
+        </div>
+
+    </div>
+
+</div>
+
+<!-- Print Styles -->
+<style>
+@media print {
+    body * {
+        visibility: hidden;
+    }
+    .no-print {
+        display: none !important;
+    }
+    .print-container, .print-container * {
+        visibility: visible;
+    }
+    .print-container {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        border: none !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+    }
+}
+</style>
+@endsection

@@ -3,13 +3,12 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Expense extends Model
 {
     protected $table = 'expenses';
-
     protected $primaryKey = 'id';
-
     public $timestamps = false;
 
     protected $fillable = [
@@ -23,8 +22,8 @@ class Expense extends Model
 
     protected $casts = [
         'expense_date' => 'datetime',
-        'created_at' => 'datetime',
-        'amount' => 'decimal:2',
+        'created_at'   => 'datetime',
+        'amount'       => 'decimal:2',
     ];
 
     public function user(): BelongsTo
