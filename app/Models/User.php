@@ -7,16 +7,13 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable;
 
     protected $table = 'users';
-
-    // ដាក់ឈ្មោះ Column Primary Key ដែលឃើញនៅក្នុង pgAdmin
-    // ប្រសិនបើក្នុង pgAdmin ឈ្មោះ "user_id" ដាក់ 'user_id'
-    // ប្រសិនបើក្នុង pgAdmin ឈ្មោះ "id" ដាក់ 'id'
     protected $primaryKey = 'user_id'; 
 
     public $incrementing = true;
