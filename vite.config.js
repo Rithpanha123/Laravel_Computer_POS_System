@@ -21,4 +21,14 @@ export default defineConfig({
             ignored: ['**/storage/framework/views/**'],
         },
     },
+    darkMode: 'class', // <--- ត្រូវតែមានបន្ទាត់នេះទើប Dark Mode ដំណើរការ!
+    content: [
+        "./resources/**/*.blade.php",
+        "./resources/**/*.js",
+        "./resources/**/*.vue",
+    ],
+        theme: {
+        extend: {},
+    },
+    plugins: [],
 });

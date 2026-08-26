@@ -4,52 +4,56 @@
 @section('page_heading', 'Invoice Details')
 
 @section('content')
-<div class="max-w-4xl mx-auto space-y-6">
+<div class="max-w-4xl mx-auto space-y-6 animate-wave-page relative overflow-hidden pb-10">
+
+    <!-- 💫 Ambient Background Glowing Orbs -->
+    <div class="absolute -top-24 -left-24 w-96 h-96 bg-blue-500/10 dark:bg-blue-600/10 rounded-full blur-3xl pointer-events-none animate-pulse-slow no-print"></div>
+    <div class="absolute top-1/3 -right-24 w-96 h-96 bg-indigo-500/10 dark:bg-indigo-600/10 rounded-full blur-3xl pointer-events-none animate-pulse-slow no-print" style="animation-delay: 1.5s;"></div>
 
     <!-- Top Action Bar (No Print) -->
-    <div class="flex items-center justify-between no-print">
-        <a href="{{ route('sales.index') }}" class="px-4 py-2 bg-white border border-gray-200 rounded-xl text-xs font-semibold text-gray-600 hover:bg-gray-50 transition shadow-sm inline-flex items-center">
+    <div class="flex items-center justify-between no-print relative z-10">
+        <a href="{{ route('sales.index') }}" class="px-4 py-2 bg-white/90 dark:bg-slate-800/90 backdrop-blur-xl border border-gray-200 dark:border-slate-700 rounded-xl text-xs font-semibold text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700 transition shadow-sm inline-flex items-center">
             <i class="fa-solid fa-arrow-left mr-2"></i> ត្រឡប់ទៅបញ្ជីវិក្កយបត្រ
         </a>
         <div class="flex items-center gap-2">
-            <a href="{{ route('pos.index') }}" class="px-4 py-2 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-xl text-xs font-bold transition inline-flex items-center">
+            <a href="{{ route('pos.index') }}" class="px-4 py-2 bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 hover:bg-blue-100 rounded-xl text-xs font-bold transition inline-flex items-center">
                 <i class="fa-solid fa-cash-register mr-1.5"></i> លក់ថ្មី (POS)
             </a>
-            <button onclick="window.print()" class="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold shadow-sm transition inline-flex items-center">
+            <button onclick="window.print()" class="px-4 py-2 bg-gradient-to-tr from-slate-900 to-slate-800 hover:from-slate-800 hover:to-slate-700 text-white rounded-xl text-xs font-bold shadow-lg shadow-slate-900/20 transition inline-flex items-center btn-pop">
                 <i class="fa-solid fa-print mr-1.5"></i> បោះពុម្ពវិក្កយបត្រ (Print)
             </button>
         </div>
     </div>
 
-    <!-- Printable Invoice Card -->
-    <div class="bg-white rounded-3xl border border-gray-100 shadow-sm p-6 sm:p-10 space-y-8 print-container">
+    <!-- Printable Invoice Card with 🪄 3D Effect & Stagger -->
+    <div class="bg-white/95 dark:bg-slate-800/95 backdrop-blur-xl rounded-3xl border border-gray-100 dark:border-slate-700/80 shadow-sm p-6 sm:p-10 space-y-8 print-container card-3d stagger-card relative z-10">
         
         <!-- Header & Company Info -->
-        <div class="flex flex-col sm:flex-row justify-between items-start pb-6 border-b border-gray-100 gap-4">
+        <div class="flex flex-col sm:flex-row justify-between items-start pb-6 border-b border-gray-100 dark:border-slate-700 gap-4">
             <div>
-                <h1 class="text-2xl font-black text-gray-800 tracking-tight flex items-center gap-2">
-                    <i class="fa-solid fa-laptop-code text-blue-600"></i> COMPUTER STORE & POS
+                <h1 class="text-2xl font-black text-gray-800 dark:text-gray-100 tracking-tight flex items-center gap-2">
+                    <i class="fa-solid fa-laptop-code text-blue-600 dark:text-blue-400"></i> COMPUTER STORE & POS
                 </h1>
-                <p class="text-xs text-gray-500 mt-1">លក់ដុំ-រាយ កុំព្យូទ័រ គ្រឿងបន្លាស់ និងសេវាកម្មជួសជុល</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">លក់ដុំ-រាយ កុំព្យូទ័រ គ្រឿងបន្លាស់ និងសេវាកម្មជួសជុល</p>
                 <p class="text-xs text-gray-400 mt-0.5">អាសយដ្ឋាន៖ រាជធានីភ្នំពេញ | ទូរស័ព្ទ៖ 012 345 678</p>
             </div>
             <div class="text-left sm:text-right">
-                <span class="inline-block font-mono font-black text-sm text-blue-600 bg-blue-50 px-3 py-1 rounded-xl border border-blue-100">
+                <span class="inline-block font-mono font-black text-sm text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/50 px-3 py-1 rounded-xl border border-blue-100 dark:border-blue-900">
                     #{{ $sale->invoice_no }}
                 </span>
-                <p class="text-xs text-gray-500 mt-2">ថ្ងៃចេញវិក្កយបត្រ៖ <span class="font-medium text-gray-800">{{ optional($sale->sale_date)->format('d M Y, h:i A') }}</span></p>
-                <p class="text-xs text-gray-500 mt-0.5">អ្នកគិតលុយ (Cashier)៖ <span class="font-medium text-gray-800">{{ $sale->user->full_name ?? $sale->user->username ?? 'Cashier' }}</span></p>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">ថ្ងៃចេញវិក្កយបត្រ៖ <span class="font-medium text-gray-800 dark:text-gray-200">{{ optional($sale->sale_date)->format('d M Y, h:i A') }}</span></p>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">អ្នកគិតលុយ (Cashier)៖ <span class="font-medium text-gray-800 dark:text-gray-200">{{ $sale->user->full_name ?? $sale->user->username ?? 'Cashier' }}</span></p>
             </div>
         </div>
 
         <!-- Customer & Payment Overview -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 bg-gray-50/70 p-5 rounded-2xl border border-gray-100">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 bg-gray-50/70 dark:bg-slate-900/50 p-5 rounded-2xl border border-gray-100 dark:border-slate-700">
             <div>
                 <p class="text-[11px] font-bold uppercase tracking-wider text-gray-400 mb-1">ព័ត៌មានអតិថិជន (Customer)</p>
-                <p class="text-sm font-bold text-gray-800">{{ $sale->customer->name ?? $sale->customer->customer_name ?? 'Walk-in Customer (ភ្ញៀវទូទៅ)' }}</p>
-                <p class="text-xs text-gray-600 mt-0.5"><i class="fa-solid fa-phone mr-1.5 text-gray-400"></i>{{ $sale->customer->phone ?? 'គ្មានលេខទូរស័ព្ទ' }}</p>
+                <p class="text-sm font-bold text-gray-800 dark:text-gray-100">{{ $sale->customer->name ?? $sale->customer->customer_name ?? 'Walk-in Customer (ភ្ញៀវទូទៅ)' }}</p>
+                <p class="text-xs text-gray-600 dark:text-gray-300 mt-0.5"><i class="fa-solid fa-phone mr-1.5 text-gray-400"></i>{{ $sale->customer->phone ?? 'គ្មានលេខទូរស័ព្ទ' }}</p>
                 @if($sale->customer->address ?? false)
-                    <p class="text-xs text-gray-500 mt-0.5"><i class="fa-solid fa-location-dot mr-1.5 text-gray-400"></i>{{ $sale->customer->address }}</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5"><i class="fa-solid fa-location-dot mr-1.5 text-gray-400"></i>{{ $sale->customer->address }}</p>
                 @endif
             </div>
 
@@ -57,20 +61,20 @@
                 <p class="text-[11px] font-bold uppercase tracking-wider text-gray-400 mb-1">ស្ថានភាពទូទាត់ (Payment Status)</p>
                 <div class="mt-1">
                     @if(strtolower($sale->payment_status) === 'paid')
-                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800">
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300">
                             <span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span> បានទូទាត់គ្រប់ចំនួន (Paid)
                         </span>
                     @elseif(strtolower($sale->payment_status) === 'partial')
-                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800">
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300">
                             <span class="w-1.5 h-1.5 rounded-full bg-amber-600"></span> នៅខ្វះខ្លះ (Partial)
                         </span>
                     @else
-                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-rose-100 text-rose-800">
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-rose-100 text-rose-800 dark:bg-rose-950/60 dark:text-rose-300">
                             <span class="w-1.5 h-1.5 rounded-full bg-rose-600"></span> មិនទាន់ទូទាត់ (Unpaid)
                         </span>
                     @endif
                 </div>
-                <p class="text-xs text-gray-500 mt-2">វិធីសាស្ត្រទូទាត់៖ <span class="font-bold text-gray-700 uppercase">{{ $sale->payment_method ?? 'Cash' }}</span></p>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">វិធីសាស្ត្រទូទាត់៖ <span class="font-bold text-gray-700 dark:text-gray-200 uppercase">{{ $sale->payment_method ?? 'Cash' }}</span></p>
             </div>
         </div>
 
@@ -78,7 +82,7 @@
         <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse text-xs sm:text-sm">
                 <thead>
-                    <tr class="bg-gray-50/75 border-b border-gray-100 text-[11px] font-bold uppercase tracking-wider text-gray-400">
+                    <tr class="bg-gray-50/75 dark:bg-slate-900/50 border-b border-gray-100 dark:border-slate-700 text-[11px] font-bold uppercase tracking-wider text-gray-400">
                         <th class="py-3 px-4">#</th>
                         <th class="py-3 px-4">មុខទំនិញ / ការពិពណ៌នា</th>
                         <th class="py-3 px-4 text-center">ចំនួន (Qty)</th>
@@ -87,20 +91,20 @@
                         <th class="py-3 px-4 text-right">សរុប ($)</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-100 text-gray-700">
+                <tbody class="divide-y divide-gray-100 dark:divide-slate-700 text-gray-700 dark:text-gray-200">
                     @forelse($sale->items as $index => $item)
-                    <tr>
+                    <tr class="hover:bg-gray-50/50 dark:hover:bg-slate-700/50 transition">
                         <td class="py-3.5 px-4 text-gray-400 font-mono">{{ $index + 1 }}</td>
                         <td class="py-3.5 px-4">
-                            <p class="font-bold text-gray-800">{{ $item->product->product_name ?? 'Item #' . $item->product_id }}</p>
+                            <p class="font-bold text-gray-800 dark:text-gray-100">{{ $item->product->product_name ?? 'Item #' . $item->product_id }}</p>
                             @if(optional($item->product)->product_code)
                                 <span class="font-mono text-[10px] text-gray-400">Code: {{ $item->product->product_code }}</span>
                             @endif
                         </td>
-                        <td class="py-3.5 px-4 text-center font-bold text-gray-800">{{ $item->quantity }}</td>
-                        <td class="py-3.5 px-4 text-right font-medium text-gray-600">${{ number_format($item->unit_price, 2) }}</td>
+                        <td class="py-3.5 px-4 text-center font-bold text-gray-800 dark:text-gray-100">{{ $item->quantity }}</td>
+                        <td class="py-3.5 px-4 text-right font-medium text-gray-600 dark:text-gray-300">${{ number_format($item->unit_price, 2) }}</td>
                         <td class="py-3.5 px-4 text-right text-gray-400">${{ number_format($item->discount_amount ?? 0, 2) }}</td>
-                        <td class="py-3.5 px-4 text-right font-bold text-gray-800">${{ number_format($item->subtotal, 2) }}</td>
+                        <td class="py-3.5 px-4 text-right font-bold text-gray-800 dark:text-gray-100">${{ number_format($item->subtotal, 2) }}</td>
                     </tr>
                     @empty
                     <tr>
@@ -112,9 +116,9 @@
         </div>
 
         <!-- Summary & Balance Calculation -->
-        <div class="flex justify-end pt-4 border-t border-gray-100">
+        <div class="flex justify-end pt-4 border-t border-gray-100 dark:border-slate-700">
             <div class="w-full sm:w-80 space-y-2.5 text-xs">
-                <div class="flex justify-between text-gray-600">
+                <div class="flex justify-between text-gray-600 dark:text-gray-300">
                     <span>សរុបបឋម (Subtotal):</span>
                     <span class="font-semibold">${{ number_format($sale->subtotal ?? $sale->total_amount, 2) }}</span>
                 </div>
@@ -125,21 +129,21 @@
                 </div>
                 @endif
                 @if(($sale->tax_amount ?? 0) > 0)
-                <div class="flex justify-between text-gray-600">
+                <div class="flex justify-between text-gray-600 dark:text-gray-300">
                     <span>ពន្ធ (Tax):</span>
                     <span class="font-semibold">+${{ number_format($sale->tax_amount, 2) }}</span>
                 </div>
                 @endif
-                <div class="flex justify-between text-sm font-black text-gray-800 pt-2 border-t border-gray-100">
+                <div class="flex justify-between text-sm font-black text-gray-800 dark:text-gray-100 pt-2 border-t border-gray-100 dark:border-slate-700">
                     <span>ទឹកប្រាក់សរុប (Grand Total):</span>
-                    <span class="text-blue-600 text-base font-black">${{ number_format($sale->total_amount, 2) }}</span>
+                    <span class="text-blue-600 dark:text-blue-400 text-base font-black count-up" data-target="{{ $sale->total_amount }}" data-prefix="$" data-decimals="2">0.00</span>
                 </div>
-                <div class="flex justify-between text-gray-700 pt-1">
+                <div class="flex justify-between text-gray-700 dark:text-gray-300 pt-1">
                     <span>បានបង់ប្រាក់ (Paid Amount):</span>
-                    <span class="font-bold text-emerald-600">${{ number_format($sale->paid_amount, 2) }}</span>
+                    <span class="font-bold text-emerald-600 dark:text-emerald-400">${{ number_format($sale->paid_amount, 2) }}</span>
                 </div>
                 @if($sale->due_amount > 0)
-                <div class="flex justify-between text-rose-600 font-bold pt-1 bg-rose-50 p-2 rounded-xl">
+                <div class="flex justify-between text-rose-600 dark:text-rose-400 font-bold pt-1 bg-rose-50 dark:bg-rose-950/50 p-2 rounded-xl">
                     <span>នៅខ្វះ (Due Balance):</span>
                     <span>${{ number_format($sale->due_amount, 2) }}</span>
                 </div>
@@ -149,26 +153,26 @@
 
         <!-- Notes -->
         @if($sale->notes)
-        <div class="p-4 bg-gray-50 rounded-2xl border border-gray-100 text-xs text-gray-600">
-            <span class="font-bold text-gray-700 block mb-1">កំណត់សម្គាល់ (Notes):</span>
+        <div class="p-4 bg-gray-50 dark:bg-slate-900/50 rounded-2xl border border-gray-100 dark:border-slate-700 text-xs text-gray-600 dark:text-gray-300">
+            <span class="font-bold text-gray-700 dark:text-gray-200 block mb-1">កំណត់សម្គាល់ (Notes):</span>
             {{ $sale->notes }}
         </div>
         @endif
 
         <!-- Footer Signatures -->
-        <div class="grid grid-cols-2 gap-8 pt-10 text-center text-xs text-gray-500">
+        <div class="grid grid-cols-2 gap-8 pt-10 text-center text-xs text-gray-500 dark:text-gray-400">
             <div>
                 <p class="mb-14 font-medium">ហត្ថលេខាអតិថិជន (Customer)</p>
-                <div class="border-b border-gray-300 w-36 mx-auto"></div>
+                <div class="border-b border-gray-300 dark:border-slate-600 w-36 mx-auto"></div>
             </div>
             <div>
                 <p class="mb-14 font-medium">ហត្ថលេខាអ្នកលក់ (Authorized Seller)</p>
-                <div class="border-b border-gray-300 w-36 mx-auto"></div>
+                <div class="border-b border-gray-300 dark:border-slate-600 w-36 mx-auto"></div>
             </div>
         </div>
 
         <!-- Thank you note -->
-        <div class="text-center pt-6 text-xs text-gray-400 border-t border-gray-100">
+        <div class="text-center pt-6 text-xs text-gray-400 border-t border-gray-100 dark:border-slate-700">
             <p>សូមអរគុណចំពោះការគាំទ្ររបស់លោកអ្នក! សូមពិនិត្យទំនិញមុនចាកចេញ។</p>
         </div>
 
@@ -176,27 +180,96 @@
 
 </div>
 
-<!-- Print Styles -->
+<!-- Animation Styles & Script Engine -->
 <style>
-@media print {
-    body * {
-        visibility: hidden;
+    /* 🪄 3D Interactive Card Tilt Effect */
+    .card-3d {
+        transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+        will-change: transform;
     }
-    .no-print {
-        display: none !important;
+    .card-3d:hover {
+        transform: translateY(-4px) scale(1.005);
+        box-shadow: 0 15px 30px -10px rgba(37, 99, 235, 0.15);
     }
-    .print-container, .print-container * {
-        visibility: visible;
+
+    /* 🌌 Background Pulse */
+    @keyframes pulseSlow {
+        0%, 100% { opacity: 0.4; transform: scale(1); }
+        50% { opacity: 0.8; transform: scale(1.1); }
     }
-    .print-container {
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: 100%;
-        border: none !important;
-        box-shadow: none !important;
-        padding: 0 !important;
+    .animate-pulse-slow {
+        animation: pulseSlow 8s ease-in-out infinite;
     }
-}
+
+    /* Card Stagger Entrance */
+    @keyframes cardStagger {
+        0% { opacity: 0; transform: translateY(15px); }
+        100% { opacity: 1; transform: translateY(0); }
+    }
+
+    .stagger-card {
+        animation: cardStagger 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        opacity: 0;
+    }
+
+    /* Print Styles */
+    @media print {
+        body * {
+            visibility: hidden;
+        }
+        .no-print {
+            display: none !important;
+        }
+        .print-container, .print-container * {
+            visibility: visible;
+        }
+        .print-container {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            border: none !important;
+            box-shadow: none !important;
+            padding: 0 !important;
+            background: white !important;
+            color: black !important;
+        }
+    }
 </style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    // 🔢 Count-up Animation Effect
+    const countElements = document.querySelectorAll('.count-up');
+    countElements.forEach(el => {
+        const target = parseFloat(el.getAttribute('data-target')) || 0;
+        const prefix = el.getAttribute('data-prefix') || '';
+        const decimals = parseInt(el.getAttribute('data-decimals')) || 0;
+        const duration = 1200;
+        const steps = 40;
+        const stepTime = duration / steps;
+        let currentStep = 0;
+
+        const timer = setInterval(() => {
+            currentStep++;
+            const progress = currentStep / steps;
+            const easeProgress = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
+            const currentVal = target * easeProgress;
+
+            el.textContent = prefix + currentVal.toLocaleString('en-US', {
+                minimumFractionDigits: decimals,
+                maximumFractionDigits: decimals
+            });
+
+            if (currentStep >= steps) {
+                clearInterval(timer);
+                el.textContent = prefix + target.toLocaleString('en-US', {
+                    minimumFractionDigits: decimals,
+                    maximumFractionDigits: decimals
+                });
+            }
+        }, stepTime);
+    });
+});
+</script>
 @endsection
