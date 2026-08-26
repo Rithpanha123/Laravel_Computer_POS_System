@@ -52,7 +52,10 @@
 
     <!-- Search & Filter Bar -->
     <div class="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm">
-        <form method="GET" action="{{ route('sales.index') }}" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3">
+        <form id="filterForm" method="GET" action="{{ route('sales.index') }}" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3">
+            <!-- Hidden per_page input -->
+            <input type="hidden" name="per_page" id="formPerPageInput" value="{{ request('per_page', 10) }}">
+
             <!-- Search Text -->
             <div class="md:col-span-2 relative">
                 <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-gray-400 text-xs">
@@ -62,18 +65,18 @@
                     type="text" 
                     name="search" 
                     value="{{ request('search') }}" 
-                    placeholder="Search invoice number, customer name..." 
+                    placeholder="Search invoice number, customer..." 
                     class="w-full pl-9 pr-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition"
                 >
             </div>
 
             <!-- Payment Status -->
             <div>
-                <select name="payment_status" class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition">
+                <select name="payment_status" onchange="document.getElementById('filterForm').submit()" class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition">
                     <option value="">All Payment Status</option>
-                    <option value="paid" {{ request('payment_status') == 'paid' ? 'selected' : '' }}>Paid</option>
-                    <option value="partial" {{ request('payment_status') == 'partial' ? 'selected' : '' }}>Partial</option>
-                    <option value="unpaid" {{ request('payment_status') == 'unpaid' ? 'selected' : '' }}>Unpaid</option>
+                    <option value="PAID" {{ strtoupper(request('payment_status')) === 'PAID' ? 'selected' : '' }}>Paid</option>
+                    <option value="PARTIAL" {{ strtoupper(request('payment_status')) === 'PARTIAL' ? 'selected' : '' }}>Partial</option>
+                    <option value="UNPAID" {{ strtoupper(request('payment_status')) === 'UNPAID' ? 'selected' : '' }}>Unpaid</option>
                 </select>
             </div>
 
@@ -88,13 +91,13 @@
                 >
             </div>
 
-            <!-- Filter Buttons -->
+            <!-- Action Buttons -->
             <div class="flex items-center space-x-2">
                 <button type="submit" class="w-full py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold rounded-xl transition">
                     Filter
                 </button>
-                @if(request()->hasAny(['search', 'payment_status', 'from_date', 'to_date']))
-                    <a href="{{ route('sales.index') }}" class="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-xl text-xs flex items-center justify-center">
+                @if(request()->hasAny(['search', 'payment_status', 'from_date', 'per_page']))
+                    <a href="{{ route('sales.index') }}" class="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-xl text-xs flex items-center justify-center transition" title="Reset Filters">
                         <i class="fa-solid fa-rotate-left"></i>
                     </a>
                 @endif
@@ -136,7 +139,7 @@
 
                         <!-- Customer -->
                         <td class="py-3.5 px-6">
-                            <p class="font-semibold text-gray-800">{{ $sale->customer->name ?? 'Walk-in Customer' }}</p>
+                            <p class="font-semibold text-gray-800">{{ $sale->customer->customer_name ?? $sale->customer->name ?? 'Walk-in Customer' }}</p>
                             @if(optional($sale->customer)->phone)
                                 <p class="text-[11px] text-gray-400">{{ $sale->customer->phone }}</p>
                             @endif
@@ -158,11 +161,11 @@
 
                         <!-- Payment Status -->
                         <td class="py-3.5 px-6">
-                            @if(strtolower($sale->payment_status) === 'paid')
+                            @if(strtoupper($sale->payment_status) === 'PAID')
                                 <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-100">
                                     <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Paid
                                 </span>
-                            @elseif(strtolower($sale->payment_status) === 'partial')
+                            @elseif(strtoupper($sale->payment_status) === 'PARTIAL')
                                 <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-amber-50 text-amber-700 border border-amber-100">
                                     <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span> Partial
                                 </span>
@@ -192,13 +195,43 @@
             </table>
         </div>
 
-        <!-- Pagination -->
-        @if($sales->hasPages())
-            <div class="px-6 py-4 border-t border-gray-100 bg-gray-50/50">
-                {{ $sales->links() }}
+        <!-- Pagination Footer -->
+        <div class="px-6 py-4 border-t border-gray-100 bg-gray-50/50 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-gray-500">
+            <div>
+                បង្ហាញពី <span class="font-bold text-gray-700">{{ $sales->firstItem() ?? 0 }}</span> ដល់ <span class="font-bold text-gray-700">{{ $sales->lastItem() ?? 0 }}</span> នៃទិន្នន័យសរុប <span class="font-bold text-gray-700">{{ $sales->total() }}</span> ជួរ
             </div>
-        @endif
+
+            <div class="flex flex-wrap items-center gap-3">
+                <!-- Dropdown Selector -->
+                <div class="flex items-center gap-1.5 whitespace-nowrap bg-white px-3 py-1 rounded-xl border border-gray-200 shadow-sm">
+                    <span class="text-gray-500 font-medium">បង្ហាញ៖</span>
+                    <select 
+                        id="perPageSelectDropdown" 
+                        onchange="changePerPage(this.value)" 
+                        class="bg-transparent border-none text-xs font-bold text-gray-800 outline-none cursor-pointer focus:ring-0 py-0.5 pr-6 pl-1"
+                    >
+                        <option value="5" {{ request('per_page', 10) == 5 ? 'selected' : '' }}>5</option>
+                        <option value="10" {{ request('per_page', 10) == 10 ? 'selected' : '' }}>10</option>
+                        <option value="25" {{ request('per_page', 10) == 25 ? 'selected' : '' }}>25</option>
+                        <option value="100" {{ request('per_page', 10) == 100 ? 'selected' : '' }}>100</option>
+                    </select>
+                    <span class="text-gray-500 font-medium">ជួរ</span>
+                </div>
+
+                <!-- Page Links -->
+                <div>
+                    {{ $sales->links() }}
+                </div>
+            </div>
+        </div>
     </div>
 
 </div>
+
+<script>
+function changePerPage(value) {
+    document.getElementById('formPerPageInput').value = value;
+    document.getElementById('filterForm').submit();
+}
+</script>
 @endsection

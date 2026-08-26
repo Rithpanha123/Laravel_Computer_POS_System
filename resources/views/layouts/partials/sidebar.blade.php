@@ -38,7 +38,7 @@
         <!-- Main Section -->
         <div>
             <p class="px-3 text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-2" :class="!sidebarOpen && 'lg:hidden'">
-                Main Menu
+                Menu
             </p>
             <div class="space-y-1">
                 <!-- Dashboard -->
@@ -48,19 +48,31 @@
                     <span class="ml-3 truncate" :class="!sidebarOpen && 'lg:hidden'">Dashboard</span>
                 </a>
 
+                <p class="px-3 text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-2" :class="!sidebarOpen && 'lg:hidden'">
+                Sale & Transactions
+            </p>
                 <!-- POS Terminal -->
                 <a href="{{ route('pos.index') }}" 
-                   class="flex items-center px-3 py-2.5 rounded-xl text-sm font-medium text-slate-300 hover:bg-slate-800 hover:text-white transition-colors group">
+                   class="flex items-center px-3 py-2.5 rounded-xl text-sm font-medium transition-colors group {{ request()->routeIs('pos.*') ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
                     <i class="fa-solid fa-cash-register w-6 text-center text-base text-emerald-400 group-hover:text-white"></i>
                     <span class="ml-3 truncate" :class="!sidebarOpen && 'lg:hidden'">POS Terminal</span>
                 </a>
 
                 <!-- Sales History -->
                 <a href="{{ route('sales.index') }}" 
-                   class="flex items-center px-3 py-2.5 rounded-xl text-sm font-medium text-slate-300 hover:bg-slate-800 hover:text-white transition-colors group">
+                   class="flex items-center px-3 py-2.5 rounded-xl text-sm font-medium transition-colors group {{ request()->routeIs('sales.*') ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
                     <i class="fa-solid fa-receipt w-6 text-center text-base text-indigo-400 group-hover:text-white"></i>
                     <span class="ml-3 truncate" :class="!sidebarOpen && 'lg:hidden'">Sales</span>
                 </a>
+
+                <div class="spac e-y-1">
+                <!-- User Management -->
+                <a href="{{ route('customers.index') }}" 
+                   class="flex items-center px-3 py-2.5 rounded-xl text-sm font-medium transition-colors group {{ request()->routeIs('customers.*') ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
+                    <i class="fa-solid fa-users-gear w-6 text-center text-base {{ request()->routeIs('customers.*') ? 'text-white' : 'text-teal-400 group-hover:text-white' }}"></i>
+                    <span class="ml-3 truncate" :class="!sidebarOpen && 'lg:hidden'">Customers</span>
+                </a>
+            </div>
             </div>
         </div>
 
@@ -72,29 +84,41 @@
             <div class="space-y-1">
                 <!-- Products -->
                 <a href="{{ route('products.index') }}" 
-                   class="flex items-center px-3 py-2.5 rounded-xl text-sm font-medium text-slate-300 hover:bg-slate-800 hover:text-white transition-colors group">
-                    <i class="fa-solid fa-boxes-stacked w-6 text-center text-base text-amber-400 group-hover:text-white"></i>
+                   class="flex items-center px-3 py-2.5 rounded-xl text-sm font-medium transition-colors group {{ request()->routeIs('products.*') ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
+                    <i class="fa-solid fa-boxes-stacked w-6 text-center text-base {{ request()->routeIs('products.*') ? 'text-white' : 'text-amber-400 group-hover:text-white' }}"></i>
                     <span class="ml-3 truncate" :class="!sidebarOpen && 'lg:hidden'">Products</span>
                 </a>
 
                 <!-- Purchases -->
                 <a href="{{ route('purchases.index') }}" 
-                   class="flex items-center px-3 py-2.5 rounded-xl text-sm font-medium text-slate-300 hover:bg-slate-800 hover:text-white transition-colors group">
-                    <i class="fa-solid fa-truck-ramp-box w-6 text-center text-base text-cyan-400 group-hover:text-white"></i>
+                   class="flex items-center px-3 py-2.5 rounded-xl text-sm font-medium transition-colors group {{ request()->routeIs('purchases.*') ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
+                    <i class="fa-solid fa-truck-ramp-box w-6 text-center text-base {{ request()->routeIs('purchases.*') ? 'text-white' : 'text-cyan-400 group-hover:text-white' }}"></i>
                     <span class="ml-3 truncate" :class="!sidebarOpen && 'lg:hidden'">Purchases</span>
                 </a>
 
+                 <div class="spac e-y-1">
+                <!-- User Management -->
+                <a href="{{ route('suppliers.index') }}" 
+                   class="flex items-center px-3 py-2.5 rounded-xl text-sm font-medium transition-colors group {{ request()->routeIs('suppliers.*') ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
+                    <i class="fa-solid fa-users-gear w-6 text-center text-base {{ request()->routeIs('suppliers.*') ? 'text-white' : 'text-teal-400 group-hover:text-white' }}"></i>
+                    <span class="ml-3 truncate" :class="!sidebarOpen && 'lg:hidden'">Suppliers</span>
+                </a>
+            </div>
+
+                <p class="px-3 text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-2" :class="!sidebarOpen && 'lg:hidden'">
+                Services & Maintenance
+            </p>
                 <!-- Repairs -->
                 <a href="{{ route('repairs.index') }}" 
-                   class="flex items-center px-3 py-2.5 rounded-xl text-sm font-medium text-slate-300 hover:bg-slate-800 hover:text-white transition-colors group">
+                   class="flex items-center px-3 py-2.5 rounded-xl text-sm font-medium transition-colors group {{ request()->routeIs('repairs.*') ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
                     <i class="fa-solid fa-screwdriver-wrench w-6 text-center text-base text-rose-400 group-hover:text-white"></i>
                     <span class="ml-3 truncate" :class="!sidebarOpen && 'lg:hidden'">Repairs</span>
                 </a>
 
                 <!-- Expenses -->
                 <a href="{{ route('expenses.index') }}" 
-                   class="flex items-center px-3 py-2.5 rounded-xl text-sm font-medium text-slate-300 hover:bg-slate-800 hover:text-white transition-colors group">
-                    <i class="fa-solid fa-wallet w-6 text-center text-base text-violet-400 group-hover:text-white"></i>
+                   class="flex items-center px-3 py-2.5 rounded-xl text-sm font-medium transition-colors group {{ request()->routeIs('expenses.*') ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
+                    <i class="fa-solid fa-wallet w-6 text-center text-base {{ request()->routeIs('expenses.*') ? 'text-white' : 'text-violet-400 group-hover:text-white' }}"></i>
                     <span class="ml-3 truncate" :class="!sidebarOpen && 'lg:hidden'">Expenses</span>
                 </a>
             </div>
@@ -120,18 +144,25 @@
                     <span class="ml-3 truncate" :class="!sidebarOpen && 'lg:hidden'">Staff</span>
                 </a>
 
+
+            <p class="px-3 text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-2" :class="!sidebarOpen && 'lg:hidden'">
+                reports
+            </p>
+
                 <!-- Reports -->
-                <a href="#" 
-                   class="flex items-center px-3 py-2.5 rounded-xl text-sm font-medium text-slate-300 hover:bg-slate-800 hover:text-white transition-colors group">
+                <a href="{{ route('reports.index') }}" 
+                   class="flex items-center px-3 py-2.5 rounded-xl text-sm font-medium transition-colors group {{ request()->routeIs('reports.*') ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
                     <i class="fa-solid fa-chart-line w-6 text-center text-base text-yellow-400 group-hover:text-white"></i>
                     <span class="ml-3 truncate" :class="!sidebarOpen && 'lg:hidden'">Reports</span>
                 </a>
             </div>
         </div>
     </div>
+    
+
 
     <!-- User Profile Footer -->
-    <div class="p-3 bg-slate-950/80 border-t border-slate-800 flex items-center justify-between">
+    {{-- <div class="p-3 bg-slate-950/80 border-t border-slate-800 flex items-center justify-between">
         <div class="flex items-center space-x-3 overflow-hidden">
             @if(Auth::user()->profile_picture ?? false)
                 <img src="{{ asset('storage/' . Auth::user()->profile_picture) }}" class="w-9 h-9 rounded-xl object-cover shrink-0 border border-slate-700">
@@ -145,5 +176,5 @@
                 <p class="text-[11px] text-slate-400 truncate">{{ Auth::user()->role->role_name ?? 'Administrator' }}</p>
             </div>
         </div>
-    </div>
+    </div> --}}
 </aside>

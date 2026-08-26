@@ -20,25 +20,44 @@ class PurchaseController extends Controller
     {
         $query = Purchase::with(['supplier', 'user', 'items.product']);
 
+        // Search តាម PO Number, ឈ្មោះអ្នកផ្គត់ផ្គង់ ឬលេខទូរស័ព្ទ
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('purchase_no', 'like', "%{$search}%")
                   ->orWhereHas('supplier', function ($sq) use ($search) {
                       $sq->where('supplier_name', 'like', "%{$search}%")
+                         ->orWhere('name', 'like', "%{$search}%")
                          ->orWhere('phone', 'like', "%{$search}%");
                   });
             });
         }
 
+        // Filter តាម Payment Status (PAID, PARTIAL, UNPAID)
         if ($request->filled('payment_status')) {
-            $query->where('payment_status', $request->payment_status);
+            $query->where('payment_status', strtoupper($request->payment_status));
         }
 
-        $purchases = $query->latest('purchase_id')->paginate(10)->withQueryString();
-        $totalPurchases = Purchase::sum('total_amount');
-        $totalPaid = Purchase::sum('paid_amount');
-        $totalDue = Purchase::sum('due_amount');
+        // Filter តាមកាលបរិច្ឆេទ
+        if ($request->filled('from_date')) {
+            $query->whereDate('purchase_date', '>=', $request->from_date);
+        }
+        if ($request->filled('to_date')) {
+            $query->whereDate('purchase_date', '<=', $request->to_date);
+        }
+
+        // ទទួលយកតម្លៃ per_page (5, 10, 25, 100) - Default: 10
+        $perPage = (int) $request->get('per_page', 10);
+        if (!in_array($perPage, [5, 10, 25, 100])) {
+            $perPage = 10;
+        }
+
+        $purchases = $query->latest('purchase_id')->paginate($perPage)->withQueryString();
+
+        // ស្ថិតិសង្ខេប
+        $totalPurchases = (float) Purchase::sum('total_amount');
+        $totalPaid = (float) Purchase::sum('paid_amount');
+        $totalDue = (float) Purchase::sum('due_amount');
 
         return view('purchases.index', compact('purchases', 'totalPurchases', 'totalPaid', 'totalDue'));
     }
@@ -79,7 +98,7 @@ class PurchaseController extends Controller
             $dueAmount = max(0, $totalAmount - $paidAmount);
 
             $paymentStatus = 'UNPAID';
-            if ($paidAmount >= $totalAmount) {
+            if ($paidAmount >= $totalAmount && $totalAmount > 0) {
                 $paymentStatus = 'PAID';
             } elseif ($paidAmount > 0) {
                 $paymentStatus = 'PARTIAL';
@@ -178,7 +197,7 @@ class PurchaseController extends Controller
             $dueAmount = max(0, $totalAmount - $paidAmount);
 
             $paymentStatus = 'UNPAID';
-            if ($paidAmount >= $totalAmount) {
+            if ($paidAmount >= $totalAmount && $totalAmount > 0) {
                 $paymentStatus = 'PAID';
             } elseif ($paidAmount > 0) {
                 $paymentStatus = 'PARTIAL';

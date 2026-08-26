@@ -3,13 +3,13 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Relations\HasMay;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Supplier extends Model
 {
     protected $table = 'suppliers';
-
-    protected $primarykey = 'supplier_id';
+    protected $primaryKey = 'supplier_id';
+    public $timestamps = false;
 
     protected $fillable = [
         'supplier_code',
@@ -19,6 +19,11 @@ class Supplier extends Model
         'email',
         'photo',
         'address',
+        'created_at',
+    ];
+
+    protected $casts = [
+        'created_at' => 'datetime',
     ];
 
     public function purchases(): HasMany

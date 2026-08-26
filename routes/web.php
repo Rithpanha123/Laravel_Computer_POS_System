@@ -9,7 +9,9 @@ use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\RepairController;
 use App\Http\Controllers\StaffController;
 use App\Http\Controllers\ExpenseController;
-
+use App\Http\Controllers\ReportController;
+use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\SupplierController;
 
 // Redirect root to login
 Route::get('/', function () {
@@ -82,5 +84,19 @@ Route::middleware('auth')->group(function () {
     Route::resource('expenses', ExpenseController::class)->except(['create', 'show', 'edit']);
 });
 
+// Report Routes
+Route::middleware('auth')->group(function () {
+    Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
+});
+
+//Customer
+Route::middleware('auth')->group(function () {
+    Route::resource('customers', CustomerController::class);
+});
+
+//Supplier
+Route::middleware('auth')->group(function () {
+    Route::resource('suppliers', SupplierController::class);
+});
 
 });

@@ -3,39 +3,34 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Customer extends Model
 {
     protected $table = 'customers';
-
-    protected $primarykey = 'customer_id';
+    protected $primaryKey = 'customer_id';
+    public $timestamps = false;
 
     protected $fillable = [
         'customer_code',
         'customer_name',
-        'customer_code',
         'phone',
         'email',
         'address',
-        'photo',
+        'created_at',
     ];
 
-    public function sale(): HasMany
+    protected $casts = [
+        'created_at' => 'datetime',
+    ];
+
+    public function sales(): HasMany
     {
-        return $this->hasMany(
-            Sale::class,
-            'customer_id',
-            'customer_id'
-        );
+        return $this->hasMany(Sale::class, 'customer_id', 'customer_id');
     }
 
-    public function repair(): HasMany
+    public function repairs(): HasMany
     {
-        return $this->hasMany(
-            Repair::class,
-            'customer_id',
-            'customer_id'
-        );
+        return $this->hasMany(Repair::class, 'customer_id', 'customer_id');
     }
 }

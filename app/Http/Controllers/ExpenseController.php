@@ -35,15 +35,21 @@ class ExpenseController extends Controller
             $query->whereDate('expense_date', '<=', $request->to_date);
         }
 
-        $expenses = $query->latest('expense_date')->paginate(10)->withQueryString();
+        // ទទួលយកតម្លៃ per_page (5, 10, 25, 100) - Default: 10
+        $perPage = (int) $request->get('per_page', 10);
+        if (!in_array($perPage, [5, 10, 25, 100])) {
+            $perPage = 10;
+        }
+
+        $expenses = $query->latest('expense_date')->paginate($perPage)->withQueryString();
 
         // ស្ថិតិសង្ខេប
         $today = Carbon::today();
         $thisMonth = Carbon::now()->startOfMonth();
 
-        $todayExpense = Expense::whereDate('expense_date', $today)->sum('amount');
-        $monthExpense = Expense::whereDate('expense_date', '>=', $thisMonth)->sum('amount');
-        $totalExpense = Expense::sum('amount');
+        $todayExpense = (float) Expense::whereDate('expense_date', $today)->sum('amount');
+        $monthExpense = (float) Expense::whereDate('expense_date', '>=', $thisMonth)->sum('amount');
+        $totalExpense = (float) Expense::sum('amount');
 
         // បញ្ជី Categories គំរូ
         $categories = [

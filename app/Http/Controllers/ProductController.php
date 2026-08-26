@@ -43,7 +43,13 @@ class ProductController extends Controller
             $query->where('is_active', $request->status === 'active');
         }
 
-        $products = $query->latest('product_id')->paginate(10)->withQueryString();
+        // ទទួលយកតម្លៃ per_page (5, 10, 25, 100) - Default: 10
+        $perPage = (int) $request->get('per_page', 10);
+        if (!in_array($perPage, [5, 10, 25, 100])) {
+            $perPage = 10;
+        }
+
+        $products = $query->latest('product_id')->paginate($perPage)->withQueryString();
         $categories = Category::all();
         $brands = Brand::all();
 
@@ -148,6 +154,15 @@ class ProductController extends Controller
      */
     public function destroy(Product $product)
     {
+        // ពិនិត្យការពារកុំឱ្យលុបទំនិញដែលមានជាប់វិក្កយបត្រលក់ ឬប័ណ្ណទិញចូល
+        if (method_exists($product, 'saleItems') && $product->saleItems()->exists()) {
+            return redirect()->route('products.index')->with('error', 'មិនអាចលុបទំនិញនេះបានទេ ដោយសារមានប្រវត្តិលក់ចេញក្នុងវិក្កយបត្រ!');
+        }
+
+        if (method_exists($product, 'purchaseItems') && $product->purchaseItems()->exists()) {
+            return redirect()->route('products.index')->with('error', 'មិនអាចលុបទំនិញនេះបានទេ ដោយសារមានប្រវត្តិនាំចូលស្តុក (PO)!');
+        }
+
         // 1. លុបរូបភាពពី Storage
         if ($product->photo && Storage::disk('public')->exists($product->photo)) {
             Storage::disk('public')->delete($product->photo);
