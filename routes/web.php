@@ -99,4 +99,7 @@ Route::middleware('auth')->group(function () {
     Route::resource('suppliers', SupplierController::class);
 });
 
+// Sales Routes (ត្រូវប្រាកដថាមានដាក់ 'destroy')
+Route::resource('sales', SaleController::class)->only(['index', 'show', 'destroy']);
+
 });

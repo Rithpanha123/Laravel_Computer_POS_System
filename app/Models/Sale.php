@@ -4,7 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Sale extends Model
 {
@@ -26,16 +25,20 @@ class Sale extends Model
         'payment_status',
         'payment_method',
         'notes',
+        'items', // បន្ថែមសម្រាប់ផ្ទុកទំនិញជា JSON
         'created_at',
     ];
 
     protected $casts = [
-        'sale_date'   => 'datetime',
-        'created_at'  => 'datetime',
-        'subtotal'    => 'float',
-        'total_amount'=> 'float',
-        'paid_amount' => 'float',
-        'due_amount'  => 'float',
+        'sale_date'       => 'datetime',
+        'created_at'      => 'datetime',
+        'subtotal'        => 'float',
+        'discount_amount' => 'float',
+        'tax_amount'      => 'float',
+        'total_amount'    => 'float',
+        'paid_amount'     => 'float',
+        'due_amount'      => 'float',
+        'items'           => 'array', // Cast JSON ទៅជា Array
     ];
 
     public function customer(): BelongsTo
@@ -46,10 +49,5 @@ class Sale extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id', 'user_id');
-    }
-
-    public function items(): HasMany
-    {
-        return $this->hasMany(SaleItem::class, 'sale_id', 'sale_id');
     }
 }

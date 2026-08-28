@@ -61,31 +61,35 @@ class RepairController extends Controller
 
     public function store(Request $request)
     {
+        // 1. Validate Form Input
         $validated = $request->validate([
-            'customer_id'          => 'required|exists:customers,customer_id',
-            'device_name'          => 'required|string|max:150',
-            'device_model'         => 'nullable|string|max:100',
-            'serial_number'        => 'nullable|string|max:100',
-            'problem_description'  => 'required|string',
-            'accessories_included' => 'nullable|string|max:255',
-            'staff_id'        => 'nullable|exists:staff,staff_id',
-            'estimated_cost'       => 'nullable|numeric|min:0',
-            'deposit_amount'       => 'nullable|numeric|min:0',
+            'customer_id'         => 'required',
+            'device_name'         => 'required|string|max:255',
+            'serial_number'       => 'nullable|string|max:100',
+            'problem_description' => 'required|string',
+            'estimated_cost'      => 'nullable|numeric|min:0',
+            'deposit_amount'      => 'nullable|numeric|min:0',
+            'technician_id'       => 'nullable',
+            'notes'               => 'nullable|string',
         ]);
 
-        $deposit = (float)($validated['deposit_amount'] ?? 0);
-        $estimate = (float)($validated['estimated_cost'] ?? 0);
+        $estimate = (float) ($request->estimated_cost ?? 0);
+        $deposit  = (float) ($request->deposit_amount ?? 0);
 
-        $validated['repair_code'] = 'REP-' . strtoupper(Str::random(6));
-        $validated['received_at'] = now();
-        $validated['status'] = 'PENDING';
-        $validated['due_amount'] = max(0, $estimate - $deposit);
-        $validated['payment_status'] = $deposit >= $estimate && $estimate > 0 ? 'PAID' : ($deposit > 0 ? 'PARTIAL' : 'UNPAID');
-        $validated['created_at'] = now();
+        // 2. បង្កើត repair_no ដោយស្វ័យប្រវត្តិ (សំខាន់បំផុត ដើម្បីកុំឱ្យជួប Not Null Violation)
+        $validated['repair_no']       = 'REP-' . date('ymd') . '-' . strtoupper(substr(uniqid(), -4));
+        
+        $validated['status']          = 'PENDING';
+        $validated['received_at']     = now();
+        $validated['due_amount']      = max(0, $estimate - $deposit);
+        $validated['payment_status']  = ($deposit >= $estimate && $estimate > 0) ? 'PAID' : ($deposit > 0 ? 'PARTIAL' : 'UNPAID');
+        $validated['created_at']      = now();
 
+        // 3. រក្សាទុកទិន្នន័យ
         $repair = Repair::create($validated);
 
-        return redirect()->route('repairs.show', $repair->repair_id)->with('success', "ប័ណ្ណទទួលជួសជុលលេខ #{$repair->repair_code} ត្រូវបានបង្កើតដោយជោគជ័យ!");
+        return redirect()->route('repairs.show', $repair->repair_id)
+                         ->with('success', "ប័ណ្ណទទួលជួសជុលលេខ #{$repair->repair_no} ត្រូវបានបង្កើតដោយជោគជ័យ!");
     }
 
     public function show(Repair $repair)
