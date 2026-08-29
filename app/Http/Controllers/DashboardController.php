@@ -58,7 +58,7 @@ class DashboardController extends Controller
         $totalStaff = Staff::where('employment_status', 'ACTIVE')->count();
 
         // ៧. វិក្កយបត្រលក់ & ទិញចូល ៥ ចុងក្រោយបង្អស់
-        $recentSales = Sale::with(['customer', 'items.product'])->latest('sale_id')->take(5)->get();
+       $recentSales = Sale::with(['customer'])->latest('sale_id')->take(5)->get();
         $recentPurchases = Purchase::with(['supplier', 'items.product'])->latest('purchase_id')->take(5)->get();
 
         // ៨. ទិន្នន័យក្រាហ្វ ៧ ថ្ងៃចុងក្រោយ (Sales vs Purchases vs Expenses)

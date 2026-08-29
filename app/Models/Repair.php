@@ -12,21 +12,25 @@ class Repair extends Model
     protected $primaryKey = 'repair_id';
     public $timestamps = false;
 
-    protected $fillable = [
-        'repair_no',
-        'customer_id',
-        'technician_id', // ត្រូវប្រាកដថាមានត្រង់នេះ
-        'device_name',
-        'serial_number',
-        'problem_description',
-        'diagnosis',
-        'estimated_cost',
-        'final_cost',
-        'status',
-        'received_at',
-        'completed_at',
-        'notes',
-    ];
+   protected $fillable = [
+    'repair_no',
+    'customer_id',
+    'technician_id',
+    'device_name',
+    'serial_number',
+    'problem_description',
+    'diagnosis',
+    'estimated_cost',
+    'deposit_amount',
+    'due_amount',
+    'final_cost',
+    'payment_status',
+    'status',
+    'received_at',
+    'completed_at',
+    'notes',
+    'created_at',
+];
 
     protected $casts = [
         'estimated_cost' => 'decimal:2',

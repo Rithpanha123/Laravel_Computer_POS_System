@@ -1,8 +1,9 @@
 <?php
-use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\AuthController;
-use App\Http\Controllers\UserController;
+
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\SaleController;
 use App\Http\Controllers\PurchaseController;
@@ -12,91 +13,49 @@ use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\SupplierController;
+use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\BrandController;
 
-// Redirect root to login
-Route::get('/', function () {
-    return redirect()->route('login');
-});
-
-// Guest Routes
+// 1. Guest Routes (Login)
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
     Route::post('/login', [AuthController::class, 'login']);
 });
 
-// Authenticated Routes
+// 2. Authenticated Routes
 Route::middleware('auth')->group(function () {
-    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
     
-    Route::get('/dashboard', function () {
-        return view('dashboard');
-    })->name('dashboard');
+    // Auth Actions
+    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-    // Add this line to register users.index, users.create, users.store, etc.
+    // Dashboard
+    Route::get('/', [DashboardController::class, 'index']);
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-    Route::middleware('auth')->group(function () {
-    Route::resource('users', UserController::class);
-});
-
-// Product Routes
-Route::middleware('auth')->group(function () {
-    Route::resource('products', ProductController::class);
-});
-
-// Sale Routes
-Route::middleware('auth')->group(function () {
-    // POS Terminal Routes
+    // POS Terminal & Sales Management
     Route::get('/pos', [SaleController::class, 'posIndex'])->name('pos.index');
     Route::post('/pos/checkout', [SaleController::class, 'store'])->name('pos.store');
+    
+    // Sales History Routes (Index, Show, Destroy)
+    Route::resource('sales', SaleController::class)->only(['index', 'show', 'destroy']);
 
-    // Sales Routes
-    Route::resource('sales', SaleController::class)->only(['index', 'show']);
-});
-Route::middleware('auth')->group(function () {
-    // ត្រូវប្រាកដថាប្រើ DashboardController ត្រង់នេះ
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-    Route::get('/', [DashboardController::class, 'index']);
-});
+    // Core POS Management Modules
+    Route::resource('products', ProductController::class);
+    Route::resource('categories', CategoryController::class);
+    Route::resource('brands', BrandController::class);
+    Route::resource('suppliers', SupplierController::class);
+    Route::resource('customers', CustomerController::class);
+    Route::resource('users', UserController::class);
 
-// Purchase Routes
-Route::middleware('auth')->group(function () {
+    // Purchases & Exports
     Route::resource('purchases', PurchaseController::class);
-});
-Route::middleware('auth')->group(function () {
     Route::get('/purchases/{purchase}/pdf', [PurchaseController::class, 'exportPdf'])->name('purchases.pdf');
     Route::get('/purchases/{purchase}/excel', [PurchaseController::class, 'exportExcel'])->name('purchases.excel');
     Route::get('/purchases-export-all-excel', [PurchaseController::class, 'exportExcel'])->name('purchases.export.all');
-});
 
-
-// Repair Routes
-Route::middleware('auth')->group(function () {
+    // Other Services
     Route::resource('repairs', RepairController::class);
-});
-
-// Staff Routes
-Route::middleware('auth')->group(function () {
     Route::resource('staff', StaffController::class);
-});
-
-// Expense Routes
-Route::middleware('auth')->group(function () {
     Route::resource('expenses', ExpenseController::class)->except(['create', 'show', 'edit']);
-});
-
-// Report Routes
-Route::middleware('auth')->group(function () {
     Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
-});
-
-//Customer
-Route::middleware('auth')->group(function () {
-    Route::resource('customers', CustomerController::class);
-});
-
-//Supplier
-Route::middleware('auth')->group(function () {
-    Route::resource('suppliers', SupplierController::class);
-});
-
 });

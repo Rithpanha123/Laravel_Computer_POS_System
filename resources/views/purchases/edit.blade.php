@@ -4,12 +4,57 @@
 @section('page_heading', 'Edit Purchase Order')
 
 @section('content')
+<!-- TomSelect CSS -->
+<link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.css" rel="stylesheet">
+<style>
+    .ts-wrapper {
+        width: 100% !important;
+        position: relative !important;
+    }
+    .ts-control {
+        border-radius: 0.75rem !important;
+        border: 1px solid #e2e8f0 !important;
+        background-color: #f8fafc !important;
+        font-size: 0.75rem !important;
+        padding: 0.5rem 0.75rem !important;
+        min-height: 38px !important;
+        box-shadow: none !important;
+    }
+    .ts-control:focus-within {
+        border-color: #6366f1 !important;
+        background-color: #ffffff !important;
+        box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.15) !important;
+    }
+    .ts-dropdown {
+        background-color: #ffffff !important;
+        border-radius: 0.75rem !important;
+        font-size: 0.75rem !important;
+        border: 1px solid #cbd5e1 !important;
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2) !important;
+        z-index: 99999 !important;
+    }
+    .ts-dropdown .ts-dropdown-content {
+        max-height: 180px !important;
+        background-color: #ffffff !important;
+    }
+    .ts-dropdown .option {
+        padding: 0.5rem 0.75rem !important;
+        border-bottom: 1px solid #f1f5f9 !important;
+        color: #334155 !important;
+    }
+    .ts-dropdown .option.active, .ts-dropdown .option:hover {
+        background-color: #eef2ff !important;
+        color: #4f46e5 !important;
+        font-weight: 600 !important;
+    }
+</style>
+
 <div x-data="editPurchaseManager()" class="max-w-5xl mx-auto space-y-6">
 
     <!-- Header -->
     <div class="flex items-center justify-between">
         <div>
-            <h2 class="text-xl font-bold text-gray-800">កែប្រែប័ណ្ណទិញចូល៖ #{{ $purchase->purchase_no }}</h2>
+            <h2 class="text-xl font-bold text-gray-800">កែប្រែប័ណ្ណទិញចូល៖ #{{ $purchase->purchase_no ?? ('PO-' . $purchase->purchase_id) }}</h2>
             <p class="text-xs sm:text-sm text-gray-500">កែសម្រួលអ្នកផ្គត់ផ្គង់ បរិមាណទំនិញ ឬព័ត៌មានទូទាត់ប្រាក់</p>
         </div>
         <a href="{{ route('purchases.show', $purchase->purchase_id) }}" class="px-4 py-2 bg-white border border-gray-200 rounded-xl text-xs font-semibold text-gray-600 hover:bg-gray-50 transition shadow-sm inline-flex items-center">
@@ -43,10 +88,11 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                     <label class="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1">អ្នកផ្គត់ផ្គង់ <span class="text-rose-500">*</span></label>
-                    <select name="supplier_id" required class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-xs focus:ring-2 focus:ring-indigo-500 outline-none">
+                    <select id="supplierSelect" name="supplier_id" placeholder="ជ្រើសរើសអ្នកផ្គត់ផ្គង់..." autocomplete="off" required>
+                        <option value="">-- ជ្រើសរើសអ្នកផ្គត់ផ្គង់ --</option>
                         @foreach($suppliers as $sup)
                             <option value="{{ $sup->supplier_id }}" {{ old('supplier_id', $purchase->supplier_id) == $sup->supplier_id ? 'selected' : '' }}>
-                                {{ $sup->supplier_name ?? $sup->name }} ({{ $sup->phone }})
+                                {{ $sup->supplier_name ?? $sup->name }} ({{ $sup->phone ?? 'គ្មានលេខ' }})
                             </option>
                         @endforeach
                     </select>
@@ -54,7 +100,7 @@
 
                 <div>
                     <label class="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1">កាលបរិច្ឆេទបញ្ជាទិញ <span class="text-rose-500">*</span></label>
-                    <input type="datetime-local" name="purchase_date" value="{{ old('purchase_date', optional($purchase->purchase_date)->format('Y-m-d\TH:i')) }}" required class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-xs focus:ring-2 focus:ring-indigo-500 outline-none">
+                    <input type="datetime-local" name="purchase_date" value="{{ old('purchase_date', optional($purchase->purchase_date)->format('Y-m-d\TH:i') ?? now()->format('Y-m-d\TH:i')) }}" required class="w-full px-3.5 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs focus:ring-2 focus:ring-indigo-500 outline-none">
                 </div>
             </div>
         </div>
@@ -88,17 +134,17 @@
                                     <select :name="`items[${index}][id]`" x-model="item.id" @change="updatePrice(index)" required class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs focus:ring-2 focus:ring-indigo-500 outline-none">
                                         <option value="">-- ជ្រើសរើសទំនិញ --</option>
                                         <template x-for="prod in availableProducts" :key="prod.product_id">
-                                            <option :value="prod.product_id" :selected="prod.product_id == item.id" x-text="`${prod.product_name} (${prod.product_code || 'No SKU'})`"></option>
+                                            <option :value="prod.product_id" :selected="prod.product_id == item.id" x-text="`${prod.product_name || prod.name} (${prod.sku || prod.barcode || 'No SKU'})`"></option>
                                         </template>
                                     </select>
                                 </td>
                                 <td class="py-3 px-4 text-center">
-                                    <input type="number" min="1" :name="`items[${index}][qty]`" x-model.number="item.qty" required class="w-full text-center px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs font-bold focus:ring-2 focus:ring-indigo-500 outline-none">
+                                    <input type="number" min="1" :name="`items[${index}][qty]`" x-model.number="item.qty" required class="w-full text-center px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs font-bold focus:ring-2 focus:ring-indigo-500 outline-none font-mono">
                                 </td>
                                 <td class="py-3 px-4 text-right">
-                                    <input type="number" step="0.01" min="0" :name="`items[${index}][cost]`" x-model.number="item.cost" required class="w-full text-right px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs font-bold focus:ring-2 focus:ring-indigo-500 outline-none">
+                                    <input type="number" step="0.01" min="0" :name="`items[${index}][cost]`" x-model.number="item.cost" required class="w-full text-right px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs font-bold focus:ring-2 focus:ring-indigo-500 outline-none font-mono">
                                 </td>
-                                <td class="py-3 px-4 text-right font-bold text-gray-800" x-text="`$${(item.qty * item.cost).toFixed(2)}`">
+                                <td class="py-3 px-4 text-right font-bold text-gray-800 font-mono" x-text="`$${((item.qty || 0) * (item.cost || 0)).toFixed(2)}`">
                                 </td>
                                 <td class="py-3 px-4 text-center">
                                     <button type="button" @click="removeItem(index)" class="p-1.5 text-gray-400 hover:text-rose-600 transition" title="លុប">
@@ -118,15 +164,15 @@
                 <div class="space-y-4">
                     <div>
                         <label class="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1">បញ្ចុះតម្លៃពីអ្នកផ្គត់ផ្គង់ ($)</label>
-                        <input type="number" step="0.01" min="0" name="discount" x-model.number="discount" class="w-full px-3.5 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs font-bold focus:ring-2 focus:ring-indigo-500 outline-none">
+                        <input type="number" step="0.01" min="0" name="discount_amount" x-model.number="discount" class="w-full px-3.5 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs font-bold focus:ring-2 focus:ring-indigo-500 outline-none font-mono">
                     </div>
                     <div>
                         <label class="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1">ពន្ធ / Tax ($)</label>
-                        <input type="number" step="0.01" min="0" name="tax" x-model.number="tax" class="w-full px-3.5 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs font-bold focus:ring-2 focus:ring-indigo-500 outline-none">
+                        <input type="number" step="0.01" min="0" name="tax_amount" x-model.number="tax" class="w-full px-3.5 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs font-bold focus:ring-2 focus:ring-indigo-500 outline-none font-mono">
                     </div>
                     <div>
                         <label class="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1">កំណត់សម្គាល់ (Notes)</label>
-                        <textarea name="notes" rows="3" class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-xs focus:ring-2 focus:ring-indigo-500 outline-none">{{ old('notes', $purchase->notes) }}</textarea>
+                        <textarea name="notes" rows="3" placeholder="ព័ត៌មានបន្ថែម..." class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-xs focus:ring-2 focus:ring-indigo-500 outline-none">{{ old('notes', $purchase->notes) }}</textarea>
                     </div>
                 </div>
 
@@ -134,19 +180,19 @@
                     <div class="space-y-2">
                         <div class="flex justify-between text-xs text-gray-600">
                             <span>សរុបបឋម (Subtotal):</span>
-                            <span class="font-bold text-gray-800" x-text="`$${calculateSubtotal().toFixed(2)}`"></span>
+                            <span class="font-bold text-gray-800 font-mono" x-text="`$${calculateSubtotal().toFixed(2)}`"></span>
                         </div>
                         <div class="flex justify-between text-xs text-indigo-600 font-bold">
                             <span>ទឹកប្រាក់សរុប (Grand Total):</span>
-                            <span class="text-sm font-black" x-text="`$${calculateTotal().toFixed(2)}`"></span>
+                            <span class="text-sm font-black font-mono" x-text="`$${calculateTotal().toFixed(2)}`"></span>
                         </div>
                         <div class="pt-2 border-t border-gray-200">
                             <label class="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1">បានទូទាត់ (Paid Amount) <span class="text-rose-500">*</span></label>
-                            <input type="number" step="0.01" min="0" name="paid_amount" x-model.number="paidAmount" required class="w-full px-3.5 py-2 bg-white border border-gray-200 rounded-xl text-xs font-bold text-emerald-600 focus:ring-2 focus:ring-indigo-500 outline-none">
+                            <input type="number" step="0.01" min="0" name="paid_amount" x-model.number="paidAmount" required class="w-full px-3.5 py-2 bg-white border border-gray-200 rounded-xl text-xs font-bold text-emerald-600 focus:ring-2 focus:ring-indigo-500 outline-none font-mono">
                         </div>
                         <div class="flex justify-between text-xs text-rose-600 font-bold pt-2 border-t border-gray-200">
                             <span>នៅជំពាក់ (Due Balance):</span>
-                            <span x-text="`$${Math.max(0, calculateTotal() - paidAmount).toFixed(2)}`"></span>
+                            <span class="font-mono" x-text="`$${Math.max(0, calculateTotal() - (paidAmount || 0)).toFixed(2)}`"></span>
                         </div>
                     </div>
                 </div>
@@ -164,7 +210,22 @@
 
 </div>
 
+<!-- TomSelect JS -->
+<script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
+
 <script>
+document.addEventListener('DOMContentLoaded', function () {
+    if (document.getElementById('supplierSelect')) {
+        new TomSelect('#supplierSelect', {
+            create: false,
+            maxOptions: 5,
+            placeholder: 'ស្វែងរកអ្នកផ្គត់ផ្គង់...',
+            allowEmptyOption: true,
+            dropdownParent: 'body'
+        });
+    }
+});
+
 function editPurchaseManager() {
     return {
         availableProducts: {!! json_encode($products) !!},
@@ -172,12 +233,12 @@ function editPurchaseManager() {
             return [
                 'id'   => $i->product_id,
                 'qty'  => (int) $i->quantity,
-                'cost' => (float) ($i->unit_cost ?? $i->cost_price ?? $i->unit_price),
+                'cost' => (float) ($i->unit_cost ?? $i->cost_price ?? $i->unit_price ?? 0),
             ];
         })) !!},
         discount: {{ (float) ($purchase->discount ?? $purchase->discount_amount ?? 0) }},
         tax: {{ (float) ($purchase->tax ?? $purchase->tax_amount ?? 0) }},
-        paidAmount: {{ (float) $purchase->paid_amount }},
+        paidAmount: {{ (float) ($purchase->paid_amount ?? 0) }},
         
         addItem() {
             this.items.push({
@@ -197,7 +258,7 @@ function editPurchaseManager() {
             const pId = this.items[index].id;
             const prod = this.availableProducts.find(p => p.product_id == pId);
             if (prod) {
-                this.items[index].cost = parseFloat(prod.cost_price || 0);
+                this.items[index].cost = parseFloat(prod.cost_price || prod.unit_cost || 0);
             }
         },
         calculateSubtotal() {

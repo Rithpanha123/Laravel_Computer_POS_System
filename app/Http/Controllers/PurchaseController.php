@@ -91,8 +91,8 @@ class PurchaseController extends Controller
                 $subtotal += ($item['cost'] * $item['qty']);
             }
 
-            $discount = (float)($request->discount ?? 0);
-            $tax = (float)($request->tax ?? 0);
+            $discount = (float)($request->discount ?? $request->discount_amount ?? 0);
+            $tax = (float)($request->tax ?? $request->tax_amount ?? 0);
             $totalAmount = max(0, ($subtotal - $discount) + $tax);
             $paidAmount = (float)$request->paid_amount;
             $dueAmount = max(0, $totalAmount - $paidAmount);
@@ -108,11 +108,13 @@ class PurchaseController extends Controller
             $purchase = Purchase::create([
                 'purchase_no'    => 'PO-' . strtoupper(Str::random(8)),
                 'supplier_id'    => $request->supplier_id,
-                'user_id'        => Auth::user()->user_id ?? 1,
+                'user_id'        => Auth::id() ?? 1,
                 'purchase_date'  => $request->purchase_date,
                 'subtotal'       => $subtotal,
                 'discount'       => $discount,
+                'discount_amount'=> $discount,
                 'tax'            => $tax,
+                'tax_amount'     => $tax,
                 'total_amount'   => $totalAmount,
                 'paid_amount'    => $paidAmount,
                 'due_amount'     => $dueAmount,
@@ -122,25 +124,28 @@ class PurchaseController extends Controller
                 'created_at'     => now(),
             ]);
 
-            // ២. បញ្ចូល items និងបន្ថែមស្តុក
+            // ២. បញ្ចូលទំនិញនីមួយៗ និងបូកស្តុក
             foreach ($request->items as $item) {
-                $product = Product::find($item['id']);
-                $itemTotal = (float)($item['cost'] * $item['qty']);
+                $qty = (int) $item['qty'];
+                $cost = (float) $item['cost'];
+                $itemSubtotal = $qty * $cost;
 
-                PurchaseItem::create([
-                    'purchase_id' => $purchase->purchase_id,
-                    'product_id'  => $product->product_id,
-                    'quantity'    => $item['qty'],
-                    'unit_cost'   => $item['cost'],
-                    'total'       => $itemTotal,
+                $purchase->items()->create([
+                    'product_id' => $item['id'],
+                    'quantity'   => $qty,
+                    'unit_cost'  => $cost,
+                    'total'      => $itemSubtotal,
+                    'subtotal'   => $itemSubtotal,
                 ]);
 
-                // បង្កើនស្តុក និង Update តម្លៃដើមចុងក្រោយ
-                $product->increment('stock_quantity', $item['qty']);
-                $product->update(['cost_price' => $item['cost']]);
+                // បូកស្តុកទំនិញចូល
+                $product = Product::where('product_id', $item['id'])->first();
+                if ($product) {
+                    $product->increment('stock_quantity', $qty);
+                }
             }
 
-            return redirect()->route('purchases.index')->with('success', "ការទិញទំនិញចូលស្តុកបានជោគជ័យ! ប័ណ្ណបញ្ជាទិញលេខ #{$purchase->purchase_no}");
+            return redirect()->route('purchases.index')->with('success', 'បានបញ្ចូលវិក្កយបត្រទិញចូលជោគជ័យ!');
         });
     }
 
@@ -162,80 +167,89 @@ class PurchaseController extends Controller
     public function update(Request $request, Purchase $purchase)
     {
         $request->validate([
-            'supplier_id'   => 'required|exists:suppliers,supplier_id',
-            'purchase_date' => 'required|date',
-            'paid_amount'   => 'required|numeric|min:0',
-            'discount'      => 'nullable|numeric|min:0',
-            'tax'           => 'nullable|numeric|min:0',
-            'notes'         => 'nullable|string',
+            'supplier_id'   => 'required',
             'items'         => 'required|array|min:1',
-            'items.*.id'    => 'required|exists:products,product_id',
+            'items.*.id'    => 'required',
             'items.*.qty'   => 'required|integer|min:1',
             'items.*.cost'  => 'required|numeric|min:0',
+            'paid_amount'   => 'required|numeric|min:0',
         ]);
 
-        return DB::transaction(function () use ($request, $purchase) {
-            // ១. ដកចំនួនចាស់ចេញពីស្តុកទំនិញជាមុន
-            foreach ($purchase->items as $oldItem) {
-                Product::where('product_id', $oldItem->product_id)
-                    ->decrement('stock_quantity', $oldItem->quantity);
-            }
+        try {
+            DB::transaction(function () use ($request, $purchase) {
+                
+                // ១. ផ្ទៀងផ្ទាត់ និងដកស្តុកចាស់ចេញវិញដោយសុវត្ថិភាព
+                foreach ($purchase->items as $oldItem) {
+                    $product = Product::where('product_id', $oldItem->product_id)->lockForUpdate()->first();
+                    if ($product) {
+                        if ($product->stock_quantity < $oldItem->quantity) {
+                            throw new \Exception("មិនអាចកែប្រែបានទេ ពីព្រោះទំនិញ '{$product->product_name}' ត្រូវបានលក់ចេញខ្លះហើយ! (ស្តុកបច្ចុប្បន្ននៅសល់តែ: {$product->stock_quantity})");
+                        }
+                        $product->decrement('stock_quantity', $oldItem->quantity);
+                    }
+                }
 
-            // ២. លុប items ចាស់ៗចោល
-            $purchase->items()->delete();
+                // ២. លុប items ចាស់ៗចោល
+                $purchase->items()->delete();
 
-            // ៣. គណនាសរុបថ្មី និងបញ្ចូលទំនិញថ្មី
-            $subtotal = 0;
-            foreach ($request->items as $item) {
-                $subtotal += ($item['cost'] * $item['qty']);
-            }
+                // ៣. បញ្ចូល items ថ្មី និងបូកស្តុកថ្មីចូល
+                $subtotal = 0;
+                foreach ($request->items as $item) {
+                    $qty = (int) $item['qty'];
+                    $cost = (float) $item['cost'];
+                    $itemSubtotal = $qty * $cost;
+                    $subtotal += $itemSubtotal;
 
-            $discount = (float)($request->discount ?? 0);
-            $tax = (float)($request->tax ?? 0);
-            $totalAmount = max(0, ($subtotal - $discount) + $tax);
-            $paidAmount = (float)$request->paid_amount;
-            $dueAmount = max(0, $totalAmount - $paidAmount);
+                    $purchase->items()->create([
+                        'product_id' => $item['id'],
+                        'quantity'   => $qty,
+                        'unit_cost'  => $cost,
+                        'total'      => $itemSubtotal,     // បន្ថែមត្រង់នេះដើម្បីកុំឱ្យ Error Not-null
+                        'subtotal'   => $itemSubtotal,
+                    ]);
 
-            $paymentStatus = 'UNPAID';
-            if ($paidAmount >= $totalAmount && $totalAmount > 0) {
-                $paymentStatus = 'PAID';
-            } elseif ($paidAmount > 0) {
-                $paymentStatus = 'PARTIAL';
-            }
+                    // បូកស្តុកទំនិញថ្មីចូល
+                    $product = Product::where('product_id', $item['id'])->first();
+                    if ($product) {
+                        $product->increment('stock_quantity', $qty);
+                    }
+                }
 
-            // ៤. បញ្ចូល items ថ្មី និងបូកស្តុកថ្មីចូលវិញ
-            foreach ($request->items as $item) {
-                $product = Product::find($item['id']);
-                $itemTotal = (float)($item['cost'] * $item['qty']);
+                // ៤. ធ្វើបច្ចុប្បន្នភាពព័ត៌មានវិក្កយបត្រ Purchase
+                $discountAmount = (float) ($request->discount_amount ?? $request->discount ?? 0);
+                $taxAmount      = (float) ($request->tax_amount ?? $request->tax ?? 0);
+                $totalAmount    = max(0, ($subtotal - $discountAmount) + $taxAmount);
+                $paidAmount     = (float) $request->paid_amount;
+                $dueAmount      = max(0, $totalAmount - $paidAmount);
 
-                PurchaseItem::create([
-                    'purchase_id' => $purchase->purchase_id,
-                    'product_id'  => $product->product_id,
-                    'quantity'    => $item['qty'],
-                    'unit_cost'   => $item['cost'],
-                    'total'       => $itemTotal,
+                $paymentStatus = 'UNPAID';
+                if ($paidAmount >= $totalAmount && $totalAmount > 0) {
+                    $paymentStatus = 'PAID';
+                } elseif ($paidAmount > 0) {
+                    $paymentStatus = 'PARTIAL';
+                }
+
+                $purchase->update([
+                    'supplier_id'     => $request->supplier_id,
+                    'purchase_date'   => $request->purchase_date ?? $purchase->purchase_date,
+                    'subtotal'        => $subtotal,
+                    'discount'        => $discountAmount,
+                    'discount_amount' => $discountAmount,
+                    'tax'             => $taxAmount,
+                    'tax_amount'      => $taxAmount,
+                    'total_amount'    => $totalAmount,
+                    'paid_amount'     => $paidAmount,
+                    'due_amount'      => $dueAmount,
+                    'payment_status'  => $paymentStatus,
+                    'notes'           => $request->notes ?? null,
                 ]);
+            });
 
-                $product->increment('stock_quantity', $item['qty']);
-                $product->update(['cost_price' => $item['cost']]);
-            }
+            return redirect()->route('purchases.index')->with('success', 'បានកែប្រែវិក្កយបត្រទិញចូលជោគជ័យ!');
 
-            // ៥. Update លើ Purchase
-            $purchase->update([
-                'supplier_id'    => $request->supplier_id,
-                'purchase_date'  => $request->purchase_date,
-                'subtotal'       => $subtotal,
-                'discount'       => $discount,
-                'tax'            => $tax,
-                'total_amount'   => $totalAmount,
-                'paid_amount'    => $paidAmount,
-                'due_amount'     => $dueAmount,
-                'payment_status' => $paymentStatus,
-                'notes'          => $request->notes,
-            ]);
-
-            return redirect()->route('purchases.show', $purchase->purchase_id)->with('success', 'ប័ណ្ណបញ្ជាទិញត្រូវបានកែប្រែដោយជោគជ័យ!');
-        });
+        } catch (\Exception $e) {
+            return back()->with('error', $e->getMessage())->withInput();
+        }
     }
 
     public function destroy(Purchase $purchase)

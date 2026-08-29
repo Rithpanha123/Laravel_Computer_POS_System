@@ -12,17 +12,38 @@
             <h2 class="text-xl font-bold text-gray-800">Sales Transactions</h2>
             <p class="text-xs sm:text-sm text-gray-500">Track all completed POS orders, invoice payments, and outstanding balances.</p>
         </div>
-        <a href="{{ route('pos.index') ?? url('/pos') }}" class="inline-flex items-center justify-center px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-xs sm:text-sm font-semibold rounded-xl shadow-sm shadow-blue-500/20 transition">
+        <a href="{{ Route::has('pos.index') ? route('pos.index') : url('/pos') }}" class="inline-flex items-center justify-center px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-xs sm:text-sm font-semibold rounded-xl shadow-sm shadow-blue-500/20 transition">
             <i class="fa-solid fa-cash-register mr-2"></i> Open POS Terminal
         </a>
     </div>
+
+    <!-- Alert Notifications -->
+    @if(session('success'))
+        <div class="bg-green-50 border-l-4 border-green-500 text-green-700 p-4 rounded-r-2xl shadow-sm flex justify-between items-center text-xs sm:text-sm">
+            <div class="flex items-center gap-2">
+                <i class="fa-solid fa-circle-check text-green-500"></i>
+                <span>{{ session('success') }}</span>
+            </div>
+            <button onclick="this.parentElement.remove()" class="text-green-700 font-bold text-base">&times;</button>
+        </div>
+    @endif
+
+    @if(session('error'))
+        <div class="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 rounded-r-2xl shadow-sm flex justify-between items-center text-xs sm:text-sm">
+            <div class="flex items-center gap-2">
+                <i class="fa-solid fa-circle-xmark text-red-500"></i>
+                <span>{{ session('error') }}</span>
+            </div>
+            <button onclick="this.parentElement.remove()" class="text-red-700 font-bold text-base">&times;</button>
+        </div>
+    @endif
 
     <!-- Summary Metrics -->
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm flex items-center justify-between">
             <div>
                 <p class="text-xs font-medium text-gray-400 uppercase tracking-wider">Total Sales</p>
-                <p class="text-2xl font-bold text-gray-800 mt-1">${{ number_format($totalRevenue, 2) }}</p>
+                <p class="text-2xl font-bold text-gray-800 mt-1">${{ number_format($totalRevenue ?? 0, 2) }}</p>
             </div>
             <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center text-xl">
                 <i class="fa-solid fa-receipt"></i>
@@ -32,7 +53,7 @@
         <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm flex items-center justify-between">
             <div>
                 <p class="text-xs font-medium text-gray-400 uppercase tracking-wider">Paid Amount</p>
-                <p class="text-2xl font-bold text-emerald-600 mt-1">${{ number_format($totalPaid, 2) }}</p>
+                <p class="text-2xl font-bold text-emerald-600 mt-1">${{ number_format($totalPaid ?? 0, 2) }}</p>
             </div>
             <div class="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center text-xl">
                 <i class="fa-solid fa-circle-check"></i>
@@ -42,7 +63,7 @@
         <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm flex items-center justify-between">
             <div>
                 <p class="text-xs font-medium text-gray-400 uppercase tracking-wider">Due Amount</p>
-                <p class="text-2xl font-bold text-rose-600 mt-1">${{ number_format($totalDue, 2) }}</p>
+                <p class="text-2xl font-bold text-rose-600 mt-1">${{ number_format($totalDue ?? 0, 2) }}</p>
             </div>
             <div class="w-12 h-12 bg-rose-50 text-rose-600 rounded-xl flex items-center justify-center text-xl">
                 <i class="fa-solid fa-clock-rotate-left"></i>
@@ -117,18 +138,27 @@
                         <th class="py-3.5 px-6">Cashier / Staff</th>
                         <th class="py-3.5 px-6">Total / Paid</th>
                         <th class="py-3.5 px-6">Payment Status</th>
-                        <th class="py-3.5 px-6 text-right">Action</th>
+                        <th class="py-3.5 px-6 text-center">Action</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100 text-gray-700">
                     @forelse($sales as $sale)
+                    @php
+                        // ការពារករណី items ជា JSON String ឬ null
+                        $saleItems = is_array($sale->items) 
+                            ? $sale->items 
+                            : (is_string($sale->items) ? json_decode($sale->items, true) : []);
+                        $itemCount = is_array($saleItems) ? count($saleItems) : 0;
+                    @endphp
                     <tr class="hover:bg-gray-50/60 transition">
                         <!-- Invoice -->
                         <td class="py-3.5 px-6">
                             <span class="font-mono font-bold text-blue-600 bg-blue-50 px-2.5 py-1 rounded-lg border border-blue-100">
-                                #{{ $sale->invoice_no }}
+                                #{{ $sale->invoice_no ?? ('INV-' . str_pad($sale->sale_id, 5, '0', STR_PAD_LEFT)) }}
                             </span>
-                            <span class="block text-[11px] text-gray-400 mt-1">{{ $sale->items->count() }} items</span>
+                            <span class="block text-[11px] text-gray-400 mt-1">
+                                {{ $itemCount }} items
+                            </span>
                         </td>
 
                         <!-- Date -->
@@ -147,25 +177,25 @@
 
                         <!-- Cashier -->
                         <td class="py-3.5 px-6">
-                            <span class="text-xs text-gray-600 font-medium">{{ $sale->user->full_name ?? $sale->user->username ?? 'System' }}</span>
+                            <span class="text-xs text-gray-600 font-medium">{{ $sale->user->name ?? $sale->user->full_name ?? 'System' }}</span>
                         </td>
 
                         <!-- Financials -->
                         <td class="py-3.5 px-6">
                             <p class="font-bold text-gray-800">${{ number_format($sale->total_amount, 2) }}</p>
-                            <p class="text-[11px] text-emerald-600 font-medium">Paid: ${{ number_format($sale->paid_amount, 2) }}</p>
-                            @if($sale->due_amount > 0)
+                            <p class="text-[11px] text-emerald-600 font-medium">Paid: ${{ number_format($sale->paid_amount ?? $sale->total_amount, 2) }}</p>
+                            @if(($sale->due_amount ?? 0) > 0)
                                 <p class="text-[11px] text-rose-500 font-medium">Due: ${{ number_format($sale->due_amount, 2) }}</p>
                             @endif
                         </td>
 
                         <!-- Payment Status -->
                         <td class="py-3.5 px-6">
-                            @if(strtoupper($sale->payment_status) === 'PAID')
+                            @if(strtoupper($sale->payment_status ?? 'PAID') === 'PAID')
                                 <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-100">
                                     <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Paid
                                 </span>
-                            @elseif(strtoupper($sale->payment_status) === 'PARTIAL')
+                            @elseif(strtoupper($sale->payment_status ?? '') === 'PARTIAL')
                                 <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-amber-50 text-amber-700 border border-amber-100">
                                     <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span> Partial
                                 </span>
@@ -177,10 +207,19 @@
                         </td>
 
                         <!-- Action -->
-                        <td class="py-3.5 px-6 text-right">
+                        <td class="py-3.5 px-6 text-center space-x-1">
+                            <!-- View / Print Invoice -->
                             <a href="{{ route('sales.show', $sale->sale_id) }}" class="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition inline-flex items-center" title="View Invoice">
                                 <i class="fa-regular fa-eye text-base"></i>
                             </a>
+                            <!-- Delete Invoice -->
+                            <form action="{{ route('sales.destroy', $sale->sale_id) }}" method="POST" class="inline-block">
+                                @csrf
+                                @method('DELETE')
+                                <button type="button" onclick="confirmDeleteSale(this, '{{ $sale->invoice_no ?? $sale->sale_id }}')" class="p-2 text-gray-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition inline-flex items-center" title="Delete">
+                                    <i class="fa-regular fa-trash-can text-base"></i>
+                                </button>
+                            </form>
                         </td>
                     </tr>
                     @empty
@@ -228,10 +267,36 @@
 
 </div>
 
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 function changePerPage(value) {
     document.getElementById('formPerPageInput').value = value;
     document.getElementById('filterForm').submit();
+}
+
+function confirmDeleteSale(button, invoiceNo) {
+    Swal.fire({
+        title: '<span class="text-xl font-bold text-gray-800">តើអ្នកពិតជាចង់លុបមែនទេ?</span>',
+        html: `អ្នកកំពុងស្នើសុំលុបវិក្កយបត្រ <strong class="text-rose-600 font-bold">"#${invoiceNo}"</strong> ចេញពីប្រព័ន្ធ។ ស្តុកទំនិញនឹងត្រូវគណនាឡើងវិញ។`,
+        icon: 'warning',
+        iconColor: '#e11d48',
+        showCancelButton: true,
+        confirmButtonText: 'បាទ/ចាស, លុបឥឡូវនេះ',
+        cancelButtonText: 'បោះបង់',
+        confirmButtonColor: '#e11d48',
+        cancelButtonColor: '#64748b',
+        reverseButtons: true,
+        customClass: {
+            popup: 'rounded-3xl shadow-2xl border border-gray-100',
+            confirmButton: 'rounded-xl px-5 py-2.5 text-xs font-bold shadow-lg shadow-rose-500/30',
+            cancelButton: 'rounded-xl px-5 py-2.5 text-xs font-semibold hover:bg-slate-600 transition'
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            button.closest('form').submit();
+        }
+    });
 }
 </script>
 @endsection

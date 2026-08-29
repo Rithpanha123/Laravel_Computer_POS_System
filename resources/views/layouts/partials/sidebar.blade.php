@@ -95,15 +95,25 @@
                     <i class="fa-solid fa-truck-ramp-box w-6 text-center text-base {{ request()->routeIs('purchases.*') ? 'text-white' : 'text-cyan-400 group-hover:text-white' }}"></i>
                     <span class="ml-3 truncate" :class="!sidebarOpen && 'lg:hidden'">Purchases</span>
                 </a>
-
-                 <div class="spac e-y-1">
                 <!-- User Management -->
                 <a href="{{ route('suppliers.index') }}" 
                    class="flex items-center px-3 py-2.5 rounded-xl text-sm font-medium transition-colors group {{ request()->routeIs('suppliers.*') ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
                     <i class="fa-solid fa-users-gear w-6 text-center text-base {{ request()->routeIs('suppliers.*') ? 'text-white' : 'text-teal-400 group-hover:text-white' }}"></i>
                     <span class="ml-3 truncate" :class="!sidebarOpen && 'lg:hidden'">Suppliers</span>
                 </a>
-            </div>
+                <!-- User Categories -->
+                <a href="{{ route('categories.index') }}" 
+                   class="flex items-center px-3 py-2.5 rounded-xl text-sm font-medium transition-colors group {{ request()->routeIs('categories.*') ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
+                    <i class="fa-solid fa-tags w-6 text-center text-base {{ request()->routeIs('categories.*') ? 'text-white' : 'text-teal-400 group-hover:text-white' }}"></i>
+                    <span class="ml-3 truncate" :class="!sidebarOpen && 'lg:hidden'">Categories</span>
+                </a>
+                <!-- User Categories -->
+                <a href="{{ route('brands.index') }}" 
+                   class="flex items-center px-3 py-2.5 rounded-xl text-sm font-medium transition-colors group {{ request()->routeIs('brands.*') ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
+                    <i class="fa-solid fa-tags w-6 text-center text-base {{ request()->routeIs('brands.*') ? 'text-white' : 'text-teal-400 group-hover:text-white' }}"></i>
+                    <span class="ml-3 truncate" :class="!sidebarOpen && 'lg:hidden'">Brands</span>
+                </a>
+            
 
                 <p class="px-3 text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-2" :class="!sidebarOpen && 'lg:hidden'">
                 Services & Maintenance
